@@ -146,6 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       SizedBox(height: 20),
+                      // bagian register
                       RichText(
                         text: TextSpan(
                           text: "Belum punya akun? ",
