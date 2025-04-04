@@ -42,82 +42,102 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true, // Pastikan ini diatur ke true
       appBar: AppBar(
         title: Text('Lupa Password'),
         backgroundColor: oren,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  Text(
-                    'Kami akan mengirimkan kode OTP ke email Anda untuk mengatur ulang kata sandi.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 20),
-                  CustomTextField(
-                    controller: _emailController,
-                    label: 'Email',
-                    validator: (value) => value == null || value.isEmpty
-                        ? 'Email tidak boleh kosong'
-                        : null,
-                  ),
-                  if (_errorMessage != null)
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        _errorMessage!,
-                        style: TextStyle(color: Colors.red),
+                      padding: const EdgeInsets.all(20.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            Text(
+                              'Kami akan mengirimkan kode OTP ke email Anda untuk mengatur ulang kata sandi.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 20),
+                            CustomTextField(
+                              controller: _emailController,
+                              label: 'Email',
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                      ? 'Email tidak boleh kosong'
+                                      : null,
+                            ),
+                            if (_errorMessage != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  _errorMessage!,
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
-                  // SizedBox(height: 20),
-                ],
-              ),
-            ),
-            // SizedBox(height: 20),
-            Image.asset(
-              'assets/images/asking-question.png',
-              height: 500,
-              width: 500,
-            ),
-            Container(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: oren,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _sendOtp();
-                  }
-                },
-                child: _isLoading
-                    ? SizedBox(
-                        height: 21,
-                        width: 21,
-                        child: const CircularProgressIndicator(
-                          color: Colors.white,
+                    // Menambahkan ruang fleksibel agar tombol berada di bawah
+                    Image.asset(
+                      'assets/images/asking-question.png',
+                      height:
+                          300, // Sesuaikan ukuran gambar agar tidak terlalu besar
+                      width: 300,
+                    ),
+                    Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: oren,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              _sendOtp();
+                            }
+                          },
+                          child: _isLoading
+                              ? SizedBox(
+                                  height: 21,
+                                  width: 21,
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  "Kirim OTP",
+                                  style: TextStyle(
+                                      fontSize: 15, color: Colors.white),
+                                ),
                         ),
-                      )
-                    : const Text(
-                        "Kirim OTP",
-                        style: TextStyle(fontSize: 15, color: Colors.white),
                       ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
