@@ -16,6 +16,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // Inisialisasi Firebase
   runApp(
+    // Menggunakan MultiProvider untuk mengelola beberapa provider
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),

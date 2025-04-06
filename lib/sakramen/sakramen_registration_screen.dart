@@ -153,7 +153,7 @@ class _SakramenRegistrationScreenState
           Navigator.pop(context); // Kembali ke halaman sebelumnya
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal mendaftar: $e')),
+            SnackBar(content: Text('Gagal mendaftarkan: $e')),
           );
         }
       } else {
