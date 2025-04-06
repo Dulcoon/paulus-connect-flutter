@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import 'sakramen_event_detail.dart';
+import '../utils/constans.dart';
 
 class SakramenEventList extends StatefulWidget {
   @override
@@ -30,7 +31,8 @@ class _SakramenEventListState extends State<SakramenEventList> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Daftar Event Sakramen Aktif'),
-        backgroundColor: Colors.blue,
+        backgroundColor: oren,
+        foregroundColor: Colors.white,
       ),
       body: FutureBuilder<List<dynamic>>(
         future: _events,

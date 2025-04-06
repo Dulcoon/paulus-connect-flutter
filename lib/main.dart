@@ -11,10 +11,13 @@ import 'screens/forgot_password_email_screen.dart';
 import 'screens/verify_otp_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'sakramen/sakramen_event_list.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Inisialisasi Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); // Inisialisasi Firebase
   runApp(
     // Menggunakan MultiProvider untuk mengelola beberapa provider
     MultiProvider(
