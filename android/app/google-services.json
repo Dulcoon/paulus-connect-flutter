@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1076972330857",
+    "project_id": "paulus-connect",
+    "storage_bucket": "paulus-connect.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1076972330857:android:ae02756458995efacca7f8",
+        "android_client_info": {
+          "package_name": "com.example.paulus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqLFALjeUs1MofzMZveMUjBIzMvc4ylHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

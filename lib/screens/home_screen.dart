@@ -364,9 +364,9 @@ class _HomeContentState extends State<HomeContent> {
                             _buildIconButton(
                               imagePath:
                                   'assets/images/bell-dynamic-gradient.png',
-                              label: 'Jadwal Misa',
+                              label: 'Sakramen',
                               onPressed: () {
-                                Navigator.pushNamed(context, '/login');
+                                Navigator.pushNamed(context, '/sakramen-list');
                               },
                             ),
                           ],

@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../utils/constans.dart';
+import 'dart:io';
+import 'package:path/path.dart'; // Import the path package for basename
+import 'package:http_parser/http_parser.dart'; // Import MediaType from http_parser
 
 class ApiService {
   // Method untuk login
@@ -86,6 +89,7 @@ class ApiService {
       },
       body: jsonEncode(data),
     );
+    print("Data yang dikirim: $data");
 
     if (response.statusCode != 201) {
       throw Exception("Gagal menyimpan data user");
@@ -171,6 +175,113 @@ class ApiService {
     if (response.statusCode != 200) {
       final responseData = jsonDecode(response.body);
       throw Exception(responseData['message']);
+    }
+  }
+
+  static Future<List<dynamic>> getActiveSakramenEvents(String token) async {
+    final url = Uri.parse('$BASE_URL/sakramen-events/active');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          return data['data']; // Mengembalikan daftar event
+        } else {
+          throw Exception(data['message'] ?? 'Gagal mengambil data.');
+        }
+      } else {
+        throw Exception(
+            'Gagal mengambil data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Terjadi kesalahan: $e');
+    }
+  }
+
+  // Fetch default data for the user
+  static Future<Map<String, dynamic>> fetchDefaultData(String token) async {
+    final url = Uri.parse('$BASE_URL/pendaftars/default');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['data']; // Mengembalikan data default
+      } else {
+        throw Exception(
+            'Gagal mengambil data default. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Terjadi kesalahan: $e');
+    }
+  }
+
+  // Fungsi untuk mengirim data pendaftaran
+  static Future<void> submitRegistrationWithFiles(
+      String token, Map<String, dynamic> data, Map<String, File?> files) async {
+    final url = Uri.parse('$BASE_URL/pendaftars/daftar');
+
+    try {
+      final request = http.MultipartRequest('POST', url)
+        ..headers.addAll({
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        });
+
+      // Tambahkan data ke dalam request
+      data.forEach((key, value) {
+        if (value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
+
+      // Tambahkan file ke dalam request
+      files.forEach((key, file) {
+        if (file != null) {
+          request.files.add(
+            http.MultipartFile(
+              key,
+              file.readAsBytes().asStream(),
+              file.lengthSync(),
+              filename: basename(file.path),
+              contentType: MediaType('application', 'octet-stream'),
+            ),
+          );
+        }
+      });
+
+      // Kirim request
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final responseData = json.decode(responseBody);
+        if (responseData['success'] != true) {
+          throw Exception(responseData['message'] ?? 'Pendaftaran gagal.');
+        }
+      } else {
+        final responseBody = await response.stream.bytesToString();
+        final responseData = json.decode(responseBody);
+        throw Exception(responseData['message'] ??
+            'Gagal mengirim data pendaftaran. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Terjadi kesalahan: $e');
     }
   }
 }

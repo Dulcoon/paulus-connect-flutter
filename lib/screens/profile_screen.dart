@@ -158,6 +158,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 'Tanggal Lahir', userProfile?['tanggal_lahir']),
                             SizedBox(height: 10),
                             _buildProfileField(
+                                'Jenis Kelamin', userProfile?['kelamin']),
+                            SizedBox(height: 10),
+                            _buildProfileField(
                                 'Nama Ayah', userProfile?['nama_ayah']),
                             SizedBox(height: 10),
                             _buildProfileField(

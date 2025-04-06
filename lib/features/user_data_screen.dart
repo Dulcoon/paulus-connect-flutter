@@ -29,6 +29,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
   final _tanggalKrismaController = TextEditingController();
 
   String? _selectedKelurahanId;
+  String? _selectedJenisKelamin; // Ensure this variable is declared
   String? _selectedBaptis;
   String? _selectedKomuni;
   String? _selectedKrisma;
@@ -108,6 +109,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
         "nama_ibu": _namaIbuController.text,
         "tempat_lahir": _tempatLahirController.text,
         "tanggal_lahir": _tanggalLahirController.text,
+        "kelamin": _selectedJenisKelamin,
         "kecamatan_tempat_tinggal": _kecamatanController.text,
         "kelurahan_id": _selectedKelurahanId,
         "alamat_lengkap": _alamatLengkapController.text,
@@ -223,6 +225,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
     _tanggalKomuniController.clear();
     _tanggalKrismaController.clear();
     setState(() {
+      _selectedJenisKelamin = null;
       _selectedBaptis = null;
       _selectedKomuni = null;
       _selectedKrisma = null;
@@ -285,6 +288,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
                       const SizedBox(height: 20),
                       _buildTextField(_namaLengkapController, 'Nama Lengkap'),
                       _buildTextField(_noHpController, 'Nomor HP'),
+                      _buildDropdownJenisKelamin(),
                       _buildTextField(_namaAyahController, 'Nama Ayah'),
                       _buildTextField(_namaIbuController, 'Nama Ibu'),
                       _buildTextField(_tempatLahirController, 'Tempat Lahir'),
@@ -361,6 +365,52 @@ class _UserDataScreenState extends State<UserDataScreen> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildDropdownJenisKelamin() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Theme(
+        data: ThemeData(
+          primaryColor: oren,
+          colorScheme: ColorScheme.light(primary: oren),
+        ),
+        child: DropdownButtonFormField<String>(
+          value: _selectedJenisKelamin,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: const BorderSide(color: oren),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: const BorderSide(color: bgCollor),
+            ),
+            labelText: 'Jenis Kelamin',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+          ),
+          items: ['Laki-Laki', 'Perempuan'].map((jenisKelamin) {
+            return DropdownMenuItem(
+              value: jenisKelamin,
+              child: Text(jenisKelamin),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedJenisKelamin = value;
+            });
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please select Jenis Kelamin';
+            }
+            return null;
+          },
+        ),
+      ),
     );
   }
 
