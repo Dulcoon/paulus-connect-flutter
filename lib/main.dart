@@ -12,12 +12,15 @@ import 'screens/verify_otp_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'sakramen/sakramen_event_list.dart';
 import 'firebase_options.dart';
+import 'screens/profile_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Inisialisasi Firebase
+
   runApp(
     // Menggunakan MultiProvider untuk mengelola beberapa provider
     MultiProvider(

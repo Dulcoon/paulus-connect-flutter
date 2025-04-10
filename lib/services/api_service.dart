@@ -284,4 +284,30 @@ class ApiService {
       throw Exception('Terjadi kesalahan: $e');
     }
   }
+
+  static Future<Map<String, dynamic>> checkRegistration(
+      String token, int sakramenEventId) async {
+    final url = Uri.parse(
+        '$BASE_URL/pendaftars/check-registration?sakramen_event_id=$sakramenEventId');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body); // Mengembalikan respons JSON
+      } else {
+        throw Exception(
+            'Gagal memeriksa status pendaftaran. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception(
+          'Terjadi kesalahan saat memeriksa status pendaftaran: $e');
+    }
+  }
 }

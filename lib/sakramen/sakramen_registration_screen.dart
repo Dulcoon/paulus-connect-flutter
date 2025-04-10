@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../widgets/custom_date_field.dart'; // Import CustomDateField
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import '../utils/constans.dart';
 
 class SakramenRegistrationScreen extends StatefulWidget {
   final Map<String, dynamic> event;
@@ -59,8 +60,7 @@ class _SakramenRegistrationScreenState
         setState(() {
           _defaultData = data;
           _isLoading = false;
-          _selectedJenisKelamin =
-              data['kelamin']; // Default ke 'laki-laki' jika null
+          _selectedJenisKelamin = data['kelamin'];
 
           // Isi nilai default ke dalam controller
           _namaLengkapController.text = data['nama'] ?? '';
@@ -150,7 +150,8 @@ class _SakramenRegistrationScreenState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Pendaftaran berhasil!')),
           );
-          Navigator.pop(context); // Kembali ke halaman sebelumnya
+          Navigator.pushNamed(
+              context, '/sakramen-list'); // Kembali ke halaman sebelumnya
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Gagal mendaftarkan: $e')),
@@ -168,9 +169,12 @@ class _SakramenRegistrationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pendaftaran ${widget.event['jenis_sakramen']}'),
-        backgroundColor: Colors.green,
+        title: Text('Pendaftaran ${widget.event['jenis_sakramen']}',
+            style: TextStyle(color: Colors.white)),
+        backgroundColor: oren,
+        foregroundColor: Colors.white,
       ),
+      backgroundColor: bgCollor,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -209,7 +213,7 @@ class _SakramenRegistrationScreenState
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30)),
                         ),
-                        items: ['Laki-laki', 'Perempuan'].map((jenisKelamin) {
+                        items: ['Laki-Laki', 'Perempuan'].map((jenisKelamin) {
                           return DropdownMenuItem(
                             value: jenisKelamin,
                             child: Text(jenisKelamin),
@@ -274,7 +278,7 @@ class _SakramenRegistrationScreenState
                     ElevatedButton(
                       onPressed: _submitRegistration,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: oren,
                         padding: EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
