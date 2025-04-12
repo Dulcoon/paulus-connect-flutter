@@ -310,4 +310,28 @@ class ApiService {
           'Terjadi kesalahan saat memeriksa status pendaftaran: $e');
     }
   }
+
+  static Future<List<dynamic>> fetchPengumuman(String token) async {
+    final url = Uri.parse('$BASE_URL/pengumuman');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['data']; // Mengembalikan daftar pengumuman
+      } else {
+        throw Exception(
+            'Gagal mengambil data pengumuman. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Terjadi kesalahan saat mengambil data pengumuman: $e');
+    }
+  }
 }

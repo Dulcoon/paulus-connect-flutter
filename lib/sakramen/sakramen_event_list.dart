@@ -58,71 +58,76 @@ class _SakramenEventListState extends State<SakramenEventList> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : _isProfileCompleted
-              ? FutureBuilder<List<dynamic>>(
-                  future: _events,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          'Error: ${snapshot.error}',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      );
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(child: Text('Tidak ada event aktif.'));
-                    }
-
-                    final events = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: events.length,
-                      itemBuilder: (context, index) {
-                        final event = events[index];
-                        return Card(
-                          margin: EdgeInsets.all(10),
-                          child: ListTile(
-                            title: Text(
-                              event['nama_event'],
-                              style: TextStyle(fontWeight: FontWeight.bold),
+          : RefreshIndicator(
+              onRefresh: _checkCompletionStatus, // Tambahkan fungsi refresh
+              child: _isProfileCompleted
+                  ? FutureBuilder<List<dynamic>>(
+                      future: _events,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Error: ${snapshot.error}',
+                              style: TextStyle(color: Colors.red),
                             ),
-                            subtitle: Text(
-                                'Jenis Sakramen: ${event['jenis_sakramen']}'),
-                            trailing: Icon(Icons.arrow_forward),
-                            onTap: () {
-                              // Navigasi ke halaman detail sakramen
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      SakramenEventDetail(event: event),
+                          );
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return Center(child: Text('Tidak ada event aktif.'));
+                        }
+
+                        final events = snapshot.data!;
+                        return ListView.builder(
+                          itemCount: events.length,
+                          itemBuilder: (context, index) {
+                            final event = events[index];
+                            return Card(
+                              margin: EdgeInsets.all(10),
+                              child: ListTile(
+                                title: Text(
+                                  event['nama_event'],
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                              );
-                            },
-                          ),
+                                subtitle: Text(
+                                    'Jenis Sakramen: ${event['jenis_sakramen']}'),
+                                trailing: Icon(Icons.arrow_forward),
+                                onTap: () {
+                                  // Navigasi ke halaman detail sakramen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          SakramenEventDetail(event: event),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                )
-              : Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Silakan lengkapi user-profile Anda terlebih dahulu.',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                        textAlign: TextAlign.center,
+                    )
+                  : Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Silakan lengkapi user-profile Anda terlebih dahulu.',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 20),
+                        ],
                       ),
-                      SizedBox(height: 20),
-                    ],
-                  ),
-                ),
+                    ),
+            ),
     );
   }
 }

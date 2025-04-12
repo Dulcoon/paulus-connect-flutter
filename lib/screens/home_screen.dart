@@ -6,6 +6,8 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'profile_screen.dart';
 import 'task_screen.dart';
 import 'favorite_screen.dart';
+import '../services/api_service.dart';
+import 'pengumuman_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -225,11 +227,33 @@ class HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<HomeContent> {
   bool _isLoading = true;
+  List<dynamic> _pengumuman = [];
 
   @override
   void initState() {
     super.initState();
     _checkCompletionStatus();
+    _fetchPengumuman();
+  }
+
+  Future<void> _fetchPengumuman() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final token = authProvider.token;
+
+    if (token != null) {
+      try {
+        final data = await ApiService.fetchPengumuman(token);
+        setState(() {
+          _pengumuman = data;
+          _isLoading = false;
+        });
+      } catch (e) {
+        print('Error fetching pengumuman: $e');
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _checkCompletionStatus() async {
@@ -260,152 +284,166 @@ class _HomeContentState extends State<HomeContent> {
             color: oren,
           ))
         : SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Salam Sejahtera,",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.normal,
+            child: RefreshIndicator(
+              color: oren,
+              onRefresh: _fetchPengumuman, // Tambahkan fungsi refresh
+              child: SingleChildScrollView(
+                physics:
+                    const AlwaysScrollableScrollPhysics(), // Agar bisa di-scroll meskipun konten sedikit
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Salam Sejahtera,",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                              const SizedBox(height: 1),
+                              Text(
+                                "${authProvider.user?.name}",
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.symmetric(
+                                vertical: BorderSide(
+                                  color: Colors.black26,
+                                  width: 2,
+                                ),
+                                horizontal: BorderSide(
+                                  color: Colors.black26,
+                                  width: 2,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 1),
-                            Text(
-                              "${authProvider.user?.name}",
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.symmetric(
-                              vertical: BorderSide(
-                                color: Colors.black26,
-                                width: 2,
-                              ),
-                              horizontal: BorderSide(
-                                color: Colors.black26,
-                                width: 2,
-                              ),
+                            width: 55,
+                            height: 55,
+                            child: Image.asset(
+                              'assets/images/notif.png',
+                              width: 0,
+                              height: 0,
                             ),
                           ),
-                          width: 55,
-                          height: 55,
-                          child: Image.asset(
-                            'assets/images/notif.png',
-                            width: 0,
-                            height: 0,
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      if (!isCompleted)
+                        CompletionPrompt(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/userData');
+                          },
+                        ),
+                      if (isCompleted) UnCompletionPrompt(),
+                      const SizedBox(height: 40),
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildIconButton(
+                                imagePath:
+                                    'assets/images/bookmark-dynamic-color.png',
+                                label: 'Doa-doa',
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/login');
+                                },
+                              ),
+                              _buildIconButton(
+                                imagePath:
+                                    'assets/images/pin-dynamic-color.png',
+                                label: 'Intensi Misa',
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/login');
+                                },
+                                imageWidth: 56,
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    if (!isCompleted)
-                      CompletionPrompt(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/userData');
-                        },
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildIconButton(
+                                imagePath:
+                                    'assets/images/calender-dynamic-color.png',
+                                label: 'Kalender Liturgi',
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/login');
+                                },
+                              ),
+                              _buildIconButton(
+                                imagePath:
+                                    'assets/images/bell-dynamic-gradient.png',
+                                label: 'Sakramen',
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                      context, '/sakramen-list');
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    if (isCompleted)
-                      // Add the widget you want to display when isCompleted is true
-                      UnCompletionPrompt(),
-                    // Add other widgets here
-                    const SizedBox(height: 40),
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildIconButton(
-                              imagePath:
-                                  'assets/images/bookmark-dynamic-color.png',
-                              label: 'Doa-doa',
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/login');
+                      const SizedBox(height: 40),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Pengumuman Gereja',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          if (_isLoading)
+                            Center(
+                                child: CircularProgressIndicator(color: oren))
+                          else if (_pengumuman.isEmpty)
+                            const Text('Tidak ada pengumuman saat ini.')
+                          else
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: _pengumuman.length,
+                              itemBuilder: (context, index) {
+                                final pengumuman = _pengumuman[index];
+                                return _buildNewsButton(
+                                  title: pengumuman['judul'],
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            PengumumanDetailScreen(
+                                                pengumuman: pengumuman),
+                                      ),
+                                    );
+                                  },
+                                );
                               },
                             ),
-                            _buildIconButton(
-                              imagePath: 'assets/images/pin-dynamic-color.png',
-                              label: 'Intensi Misa',
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/login');
-                              },
-                              imageWidth: 56,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildIconButton(
-                              imagePath:
-                                  'assets/images/calender-dynamic-color.png',
-                              label: 'Kalender Liturgi',
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/login');
-                              },
-                            ),
-                            _buildIconButton(
-                              imagePath:
-                                  'assets/images/bell-dynamic-gradient.png',
-                              label: 'Sakramen',
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/sakramen-list');
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 40),
-                    const Text(
-                      'Berita Gereja',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 15),
-                    _buildNewsButton(
-                      title:
-                          'Lorem ipsum dolor, sit amet consectetur adipisicing elit.',
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/artikel');
-                      },
-                    ),
-                    const SizedBox(height: 15),
-                    _buildNewsButton(
-                      title:
-                          'Lorem ipsum dolor, sit amet consectetur adipisicing elit.',
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/login');
-                      },
-                    ),
-                    const SizedBox(height: 15),
-                    _buildNewsButton(
-                      title:
-                          'Lorem ipsum dolor, sit amet consectetur adipisicing elit.',
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/login');
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -445,51 +483,58 @@ class _HomeContentState extends State<HomeContent> {
     required String title,
     required VoidCallback onPressed,
   }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+    return Padding(
+      padding:
+          const EdgeInsets.only(bottom: 10.0), // Tambahkan jarak antar card
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1, // Batasi hanya 1 baris
+                    overflow: TextOverflow
+                        .ellipsis, // Tambahkan ... jika teks terlalu panjang
                   ),
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Baca Selangkapnya',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w300,
+                  const SizedBox(height: 5),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Baca Selengkapnya',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w300,
+                        ),
                       ),
-                    ),
-                    const Icon(
-                      Icons.arrow_forward,
-                      color: Colors.black54,
-                    ),
-                  ],
-                ),
-              ],
+                      const Icon(
+                        Icons.arrow_forward,
+                        color: Colors.black54,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
+          ],
+        ),
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 15),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
           ),
-        ],
-      ),
-      style: ElevatedButton.styleFrom(
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 15),
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
         ),
       ),
     );
