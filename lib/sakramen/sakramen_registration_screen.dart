@@ -144,6 +144,11 @@ class _SakramenRegistrationScreenState
             'berkas_surat_baptis': _berkasSuratBaptis,
             'berkas_surat_komuni': _berkasSuratKomuni,
           };
+          print('Files to be uploaded:');
+          print('KK: ${_berkasKK?.path}');
+          print('Akta Kelahiran: ${_berkasAktaKelahiran?.path}');
+          print('Surat Baptis: ${_berkasSuratBaptis?.path}');
+          print('Surat Komuni: ${_berkasSuratKomuni?.path}');
 
           await ApiService.submitRegistrationWithFiles(token, data, files);
 
@@ -241,21 +246,34 @@ class _SakramenRegistrationScreenState
                     SizedBox(height: 20),
 
                     // File Uploaders
-                    ElevatedButton(
-                      onPressed: () => _pickFile('kk'),
-                      child: Text(_berkasKK == null
-                          ? 'Upload Berkas KK'
-                          : 'Berkas KK Terpilih'),
-                    ),
-                    SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () => _pickFile('akta'),
-                      child: Text(_berkasAktaKelahiran == null
-                          ? 'Upload Akta Kelahiran'
-                          : 'Akta Kelahiran Terpilih'),
-                    ),
-                    if (widget.event['jenis_sakramen'] == 'komuni' ||
-                        widget.event['jenis_sakramen'] == 'krisma') ...[
+                    if (widget.event['jenis_sakramen'] == 'Baptis') ...[
+                      ElevatedButton(
+                        onPressed: () => _pickFile('kk'),
+                        child: Text(_berkasKK == null
+                            ? 'Upload Berkas KK'
+                            : 'Berkas KK Terpilih'),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () => _pickFile('akta'),
+                        child: Text(_berkasAktaKelahiran == null
+                            ? 'Upload Akta Kelahiran'
+                            : 'Akta Kelahiran Terpilih'),
+                      ),
+                    ] else if (widget.event['jenis_sakramen'] == 'Komuni') ...[
+                      ElevatedButton(
+                        onPressed: () => _pickFile('kk'),
+                        child: Text(_berkasKK == null
+                            ? 'Upload Berkas KK'
+                            : 'Berkas KK Terpilih'),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () => _pickFile('akta'),
+                        child: Text(_berkasAktaKelahiran == null
+                            ? 'Upload Akta Kelahiran'
+                            : 'Akta Kelahiran Terpilih'),
+                      ),
                       SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => _pickFile('baptis'),
@@ -263,8 +281,27 @@ class _SakramenRegistrationScreenState
                             ? 'Upload Surat Baptis'
                             : 'Surat Baptis Terpilih'),
                       ),
-                    ],
-                    if (widget.event['jenis_sakramen'] == 'krisma') ...[
+                    ] else if (widget.event['jenis_sakramen'] == 'Krisma') ...[
+                      ElevatedButton(
+                        onPressed: () => _pickFile('kk'),
+                        child: Text(_berkasKK == null
+                            ? 'Upload Berkas KK'
+                            : 'Berkas KK Terpilih'),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () => _pickFile('akta'),
+                        child: Text(_berkasAktaKelahiran == null
+                            ? 'Upload Akta Kelahiran'
+                            : 'Akta Kelahiran Terpilih'),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () => _pickFile('baptis'),
+                        child: Text(_berkasSuratBaptis == null
+                            ? 'Upload Surat Baptis'
+                            : 'Surat Baptis Terpilih'),
+                      ),
                       SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => _pickFile('komuni'),

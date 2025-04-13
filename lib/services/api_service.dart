@@ -271,6 +271,8 @@ class ApiService {
       if (response.statusCode == 200) {
         final responseBody = await response.stream.bytesToString();
         final responseData = json.decode(responseBody);
+        print('Response from server: $responseData');
+        // print(responseData);
         if (responseData['success'] != true) {
           throw Exception(responseData['message'] ?? 'Pendaftaran gagal.');
         }
