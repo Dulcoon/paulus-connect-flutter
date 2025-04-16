@@ -95,4 +95,22 @@ class AuthProvider with ChangeNotifier {
       throw error;
     }
   }
+
+  Future<void> loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString('token');
+
+    if (_token != null) {
+      try {
+        // Ambil data user jika token valid
+        final response = await ApiService.getUserData(_token!);
+        _user = UserModel.fromJson(response);
+        notifyListeners();
+      } catch (e) {
+        // Jika token tidak valid, hapus token dari SharedPreferences
+        await prefs.remove('token');
+        _token = null;
+      }
+    }
+  }
 }

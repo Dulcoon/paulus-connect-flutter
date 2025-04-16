@@ -42,6 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isCompleted = authProvider.user?.isCompleted == 1;
 
     return Scaffold(
+      backgroundColor: bgCollor,
       body: _isLoading
           ? Center(
               child: CircularProgressIndicator(

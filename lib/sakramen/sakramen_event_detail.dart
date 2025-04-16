@@ -167,28 +167,43 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
     if (!await directory.exists()) {
       await directory.create(recursive: true);
     }
-    return '${directory.path}/$fileName';
+
+    String filePath = '${directory.path}/$fileName';
+    int counter = 1;
+
+    // Periksa apakah file sudah ada, jika ya tambahkan angka ke nama file
+    while (await File(filePath).exists()) {
+      final fileNameWithoutExtension = fileName.split('.').first;
+      final fileExtension = fileName.split('.').last;
+      filePath =
+          '${directory.path}/${fileNameWithoutExtension}_($counter).$fileExtension';
+      counter++;
+    }
+
+    return filePath;
   }
 
   Future<bool> _requestPermission() async {
-    if (Platform.isAndroid && await _isAndroid11OrHigher()) {
-      print('object');
-      // Untuk Android 11+ gunakan MANAGE_EXTERNAL_STORAGE
-      final status = await Permission.manageExternalStorage.status;
-      if (status.isDenied || status.isPermanentlyDenied) {
-        final result = await Permission.manageExternalStorage.request();
-        return result.isGranted;
+    if (Platform.isAndroid) {
+      if (await _isAndroid11OrHigher()) {
+        // Untuk Android 11+ gunakan MANAGE_EXTERNAL_STORAGE
+        final status = await Permission.manageExternalStorage.status;
+        if (status.isDenied || status.isPermanentlyDenied) {
+          final result = await Permission.manageExternalStorage.request();
+          return result.isGranted;
+        }
+        return status.isGranted;
+      } else {
+        // Untuk Android 10 atau lebih rendah gunakan READ/WRITE_EXTERNAL_STORAGE
+        final status = await Permission.storage.status;
+        if (status.isDenied || status.isPermanentlyDenied) {
+          final result = await Permission.storage.request();
+          return result.isGranted;
+        }
+        return status.isGranted;
       }
-      return status.isGranted;
-    } else {
-      // Untuk Android 10 atau lebih rendah gunakan READ/WRITE_EXTERNAL_STORAGE
-      final status = await Permission.storage.status;
-      if (status.isDenied || status.isPermanentlyDenied) {
-        final result = await Permission.storage.request();
-        return result.isGranted;
-      }
-      return status.isGranted;
     }
+    return false; // Untuk platform selain Android
   }
 
   Future<bool> _isAndroid11OrHigher() async {
@@ -219,8 +234,9 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
 
     return Scaffold(
       appBar: AppBar(
+        foregroundColor: Colors.white,
         title: Text(
-          event['nama_event'],
+          'Sakramen ${event['jenis_sakramen']}',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: oren,
@@ -232,44 +248,24 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header dengan background hijau
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: oren,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20),
+                  SizedBox(height: 16),
+                  Center(
+                    child: Text(
+                      event['nama_event']
+                          .toUpperCase(), // Ubah teks menjadi uppercase
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          event['nama_event'],
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Jenis Sakramen: ${event['jenis_sakramen']}',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
+                  // Header dengan background hijau
+
                   SizedBox(height: 16),
 
                   // Detail Event
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -298,13 +294,15 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                           color: Colors.orange[100],
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Text(
-                          'Anda sudah menerima sakramen ini. Apabila data ini tidak valid, silahkan melakukan perubahan data ke bagian menu profile.',
-                          style: TextStyle(
-                            color: Colors.orange[800],
-                            fontWeight: FontWeight.bold,
+                        child: Center(
+                          child: Text(
+                            'Anda sudah menerima sakramen ini. Apabila data ini tidak valid, silahkan melakukan perubahan data ke bagian menu profile.',
+                            style: TextStyle(
+                              color: Colors.orange[800],
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
                     )
@@ -321,13 +319,15 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Anda sudah mendaftar sakramen ini! \nStatus Pendaftaran: $_status',
-                              style: TextStyle(
-                                color: Colors.orange[800],
-                                fontWeight: FontWeight.bold,
+                            Center(
+                              child: Text(
+                                'Anda sudah mendaftar sakramen ini! \nStatus Pendaftaran: $_status',
+                                style: TextStyle(
+                                  color: Colors.orange[800],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                             if (_alasan != null && _alasan!.isNotEmpty) ...[
                               SizedBox(height: 8),
@@ -336,7 +336,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                                   'Pesan: $_alasan',
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.normal,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -476,16 +476,19 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$label:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+          Expanded(
+            flex: 2, // Bagian kiri (label)
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
           ),
-          SizedBox(width: 8),
           Expanded(
+            flex: 3, // Bagian kanan (value)
             child: Text(
               value,
               style: TextStyle(

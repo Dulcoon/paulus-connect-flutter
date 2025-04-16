@@ -51,6 +51,7 @@ class _SakramenEventListState extends State<SakramenEventList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: bgCollor,
       appBar: AppBar(
         title: Text('Daftar Event Sakramen Aktif'),
         backgroundColor: oren,
@@ -85,6 +86,7 @@ class _SakramenEventListState extends State<SakramenEventList> {
                           itemBuilder: (context, index) {
                             final event = events[index];
                             return Card(
+                              elevation: 1,
                               margin: EdgeInsets.all(10),
                               child: ListTile(
                                 title: Text(

@@ -29,12 +29,24 @@ class PengumumanDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Pengumuman Gereja',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          )),
+                    ],
+                  ),
+                  SizedBox(height: 12),
                   // Gambar pengumuman
                   if (pengumuman['gambar'] != null)
                     ClipRRect(
                       borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(30),
-                        bottomRight: Radius.circular(30),
+                        bottomLeft: Radius.circular(0),
+                        bottomRight: Radius.circular(0),
                       ),
                       child: Image.network(
                         imageUrl,
@@ -96,7 +108,7 @@ class PengumumanDetailScreen extends StatelessWidget {
 
                         // Isi pengumuman dalam card
                         Card(
-                          elevation: 4,
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
@@ -121,7 +133,7 @@ class PengumumanDetailScreen extends StatelessWidget {
           ),
           // Tombol kembali
           Positioned(
-            top: 20,
+            top: 25,
             left: 16,
             child: GestureDetector(
               onTap: () => Navigator.pop(context),

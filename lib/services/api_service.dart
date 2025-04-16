@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constans.dart';
 import 'dart:io';
 import 'package:path/path.dart'; // Import the path package for basename
 import 'package:http_parser/http_parser.dart'; // Import MediaType from http_parser
+import 'package:firebase_messaging/firebase_messaging.dart'; // Import FirebaseMessaging
 
 class ApiService {
   // Method untuk login
@@ -16,7 +18,10 @@ class ApiService {
     );
 
     if (response.statusCode == 201) {
-      return jsonDecode(response.body);
+      final data = jsonDecode(response.body);
+      await saveUserToken(data['token']); // Simpan user_token
+      await sendFcmTokenToLaravel(data['token']); // Kirim fcm_token ke Laravel
+      return data;
     } else {
       throw Exception("Login gagal");
     }
@@ -37,8 +42,10 @@ class ApiService {
     );
 
     if (response.statusCode == 201) {
-      print('sukses');
-      return jsonDecode(response.body);
+      final data = jsonDecode(response.body);
+      await saveUserToken(data['token']); // Simpan user_token
+      await sendFcmTokenToLaravel(data['token']); // Kirim fcm_token ke Laravel
+      return data;
     } else {
       throw Exception("Registrasi gagal");
     }
@@ -54,8 +61,48 @@ class ApiService {
       },
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode == 200) {
+      await clearUserToken(); // Hapus user_token dari SharedPreferences
+    } else {
       throw Exception("Logout gagal");
+    }
+  }
+
+  // Fungsi untuk menyimpan user_token ke SharedPreferences
+  static Future<void> saveUserToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_token', token);
+    print('Token berhasil disimpan: $token');
+  }
+
+  // Fungsi untuk menghapus user_token dari SharedPreferences
+  static Future<void> clearUserToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_token');
+    print('Token berhasil dihapus');
+  }
+
+  // Fungsi untuk mengirim fcm_token ke Laravel
+  static Future<void> sendFcmTokenToLaravel(String userToken) async {
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    if (fcmToken == null) {
+      print('FCM Token tidak tersedia');
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('$BASE_URL/save-fcm-token'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $userToken',
+      },
+      body: jsonEncode({'fcm_token': fcmToken}),
+    );
+
+    if (response.statusCode == 200) {
+      print('FCM Token berhasil dikirim ke server $fcmToken');
+    } else {
+      print('Gagal mengirim FCM Token ke server: ${response.statusCode}');
     }
   }
 
