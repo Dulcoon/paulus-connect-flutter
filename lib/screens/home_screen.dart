@@ -362,7 +362,7 @@ class _HomeContentState extends State<HomeContent> {
                                     'assets/images/bookmark-dynamic-color.png',
                                 label: 'Doa-doa',
                                 onPressed: () {
-                                  Navigator.pushNamed(context, '/login');
+                                  Navigator.pushNamed(context, '/doa');
                                 },
                               ),
                               _buildIconButton(

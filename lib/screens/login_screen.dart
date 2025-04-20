@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import 'home_screen.dart';
 import '../utils/constans.dart';
 import 'forgot_password_email_screen.dart';
+import '../widgets/custom_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -76,51 +77,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       SizedBox(height: 30),
-                      TextField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: Colors.black, // Warna border saat aktif
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color:
-                                  Colors.grey, // Warna border saat tidak aktif
-                            ),
-                          ),
-                          labelText: "Email Address",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      TextField(
-                        obscureText: true,
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: "Password",
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: Colors.black, // Warna border saat aktif
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color:
-                                  Colors.grey, // Warna border saat tidak aktif
-                            ),
-                          ),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
+                      CustomTextField(
+                          controller: _emailController,
+                          label: "Email Address",
+                          primaryColor: oren,
+                          borderColor: oren),
+                      CustomTextField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          label: "Password",
+                          primaryColor: oren,
+                          borderColor: oren),
+
                       Container(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -147,39 +115,44 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SizedBox(height: 20),
                       // bagian register
-                      RichText(
-                        text: TextSpan(
-                          text: "Belum punya akun? ",
-                          style: TextStyle(color: Colors.black),
-                          children: [
-                            TextSpan(
-                              text: "Daftar",
-                              style: TextStyle(
-                                color: oren,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.pushNamed(context, '/register');
-                                },
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              text: "Belum punya akun? ",
+                              style: TextStyle(color: Colors.black),
+                              children: [
+                                TextSpan(
+                                  text: "Daftar",
+                                  style: TextStyle(
+                                    color: oren,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Navigator.pushNamed(context, '/register');
+                                    },
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ForgotPasswordEmailScreen(),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ForgotPasswordEmailScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Lupa Password?',
+                              style: TextStyle(color: oren),
                             ),
-                          );
-                        },
-                        child: Text(
-                          'Lupa Password?',
-                          style: TextStyle(color: oren),
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

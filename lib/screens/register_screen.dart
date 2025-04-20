@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constans.dart';
+import '../widgets/custom_text_field.dart'; // Import CustomTextField
 import 'home_screen.dart';
 import 'package:flutter/gestures.dart';
 
@@ -87,94 +88,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       SizedBox(height: 30),
-                      TextField(
+                      CustomTextField(
                         controller: _nameController,
-                        decoration: InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: Colors.black, // Warna border saat aktif
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color:
-                                  Colors.grey, // Warna border saat tidak aktif
-                            ),
-                          ),
-                          labelText: "Nama Lengkap",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                        ),
+                        label: "Nama Lengkap",
+                        primaryColor: oren,
+                        borderColor: oren,
                       ),
-                      SizedBox(height: 20),
-                      TextField(
+                      CustomTextField(
                         controller: _emailController,
-                        decoration: InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: Colors.black, // Warna border saat aktif
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color:
-                                  Colors.grey, // Warna border saat tidak aktif
-                            ),
-                          ),
-                          labelText: "Email Address",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                        ),
+                        label: "Email Address",
+                        primaryColor: oren,
+                        borderColor: oren,
                       ),
-                      SizedBox(height: 20),
-                      TextField(
-                        obscureText: true,
+                      CustomTextField(
                         controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: "Password",
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: Colors.black, // Warna border saat aktif
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color:
-                                  Colors.grey, // Warna border saat tidak aktif
-                            ),
-                          ),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      TextField(
+                        label: "Password",
+                        primaryColor: oren,
+                        borderColor: oren,
                         obscureText: true,
+                      ),
+                      CustomTextField(
                         controller: _confirmPasswordController,
-                        decoration: InputDecoration(
-                          labelText: "Konfirmasi kata sandi",
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: Colors.black, // Warna border saat aktif
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color:
-                                  Colors.grey, // Warna border saat tidak aktif
-                            ),
-                          ),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                        ),
+                        label: "Konfirmasi kata sandi",
+                        primaryColor: oren,
+                        borderColor: oren,
+                        obscureText: true,
                       ),
                       const SizedBox(height: 20),
                       Container(
@@ -196,7 +134,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text("Masuk",
+                              : const Text("Daftar",
                                   style: TextStyle(
                                       fontSize: 15, color: Colors.white)),
                         ),

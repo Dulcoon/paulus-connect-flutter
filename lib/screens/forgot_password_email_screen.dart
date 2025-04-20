@@ -72,6 +72,8 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
                             ),
                             SizedBox(height: 20),
                             CustomTextField(
+                              primaryColor: oren,
+                              borderColor: oren,
                               controller: _emailController,
                               label: 'Email',
                               validator: (value) =>

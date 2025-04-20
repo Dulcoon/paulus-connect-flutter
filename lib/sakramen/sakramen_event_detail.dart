@@ -233,6 +233,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
     final event = widget.event;
 
     return Scaffold(
+      backgroundColor: bgCollor,
       appBar: AppBar(
         foregroundColor: Colors.white,
         title: Text(

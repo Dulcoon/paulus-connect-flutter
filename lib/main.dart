@@ -19,6 +19,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'utils/constans.dart';
 import 'sakramen/sakramen_event_detail.dart';
+import 'doa/list_doa_screen.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 // Inisialisasi plugin notifikasi lokal
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -28,6 +30,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -75,6 +78,7 @@ Future<void> main() async {
           '/home': (context) => HomeScreen(),
           '/artikel': (context) => ArtikelScreen(),
           '/userData': (context) => UserDataScreen(),
+          '/doa': (context) => ListDoaScreen(),
           '/sakramen-list': (context) => SakramenEventList(),
           '/forgot-password': (context) => ForgotPasswordEmailScreen(),
           '/verify-otp': (context) => VerifyOtpScreen(
@@ -109,8 +113,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         ),
       ),
     );
-    print('terkirimPesan');
   } else if (message.data.isNotEmpty) {
+    print('terkirimPesan');
     // Menampilkan notifikasi manual untuk Data Message
     flutterLocalNotificationsPlugin.show(
       message.hashCode,
@@ -122,6 +126,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           'Default',
           importance: Importance.max,
           priority: Priority.high,
+          styleInformation: BigTextStyleInformation(
+            message.data['body'] ??
+                'Isi Default', // Teks lengkap untuk notifikasi
+            contentTitle: message.data['title'] ?? 'Judul Default', // Judul
+            htmlFormatContent: true, // Jika ingin mendukung HTML
+            htmlFormatContentTitle: true, // Jika ingin mendukung HTML di judul
+          ),
         ),
       ),
     );
@@ -157,6 +168,14 @@ void setupFCM() async {
             'Default',
             importance: Importance.max,
             priority: Priority.high,
+            styleInformation: BigTextStyleInformation(
+              message.data['body'] ??
+                  'Isi Default', // Teks lengkap untuk notifikasi
+              contentTitle: message.data['title'] ?? 'Judul Default', // Judul
+              htmlFormatContent: true, // Jika ingin mendukung HTML
+              htmlFormatContentTitle:
+                  true, // Jika ingin mendukung HTML di judul
+            ),
           ),
         ),
       );
@@ -172,6 +191,14 @@ void setupFCM() async {
             'Default',
             importance: Importance.max,
             priority: Priority.high,
+            styleInformation: BigTextStyleInformation(
+              message.data['body'] ??
+                  'Isi Default', // Teks lengkap untuk notifikasi
+              contentTitle: message.data['title'] ?? 'Judul Default', // Judul
+              htmlFormatContent: true, // Jika ingin mendukung HTML
+              htmlFormatContentTitle:
+                  true, // Jika ingin mendukung HTML di judul
+            ),
           ),
         ),
       );

@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import '../utils/constans.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-  final FormFieldValidator<String>?
-      validator; // Tambahkan validator sebagai atribut opsional
+  final Color primaryColor;
+  final Color borderColor;
+  final String? Function(String?)? validator;
+  final bool obscureText;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.label,
-    this.validator, // Inisialisasi validator
-  }) : super(key: key);
+    required this.primaryColor,
+    required this.borderColor,
+    this.validator,
+    this.obscureText = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,27 +25,27 @@ class CustomTextField extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 15),
       child: Theme(
         data: ThemeData(
-          primaryColor: Colors.orange, // Replace with your `oren` color
-          colorScheme: ColorScheme.light(primary: Colors.orange),
+          primaryColor: primaryColor,
+          colorScheme: ColorScheme.light(primary: primaryColor),
         ),
         child: TextFormField(
           controller: controller,
+          validator: validator,
+          obscureText: obscureText, // Gunakan properti obscureText
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Colors.orange),
+              borderSide: BorderSide(color: primaryColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(
-                  color: Colors.grey), // Replace with `bgCollor`
+              borderSide: BorderSide(color: Colors.grey.shade500),
             ),
             labelText: label,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
           ),
-          validator: validator, // Gunakan validator yang diberikan
         ),
       ),
     );
