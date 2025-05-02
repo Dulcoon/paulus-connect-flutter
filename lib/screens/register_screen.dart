@@ -59,11 +59,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Container(
             child: Column(
               children: [
-                SizedBox(height: 150),
+                const SizedBox(height: 150),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 35),
                   width: double.infinity,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(40),
@@ -72,22 +72,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: Column(
                     children: [
-                      SizedBox(height: 50),
-                      Text(
+                      const SizedBox(height: 50),
+                      const Text(
                         "Daftar",
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      const Text(
                         "Silahkan daftarkan diri anda!",
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.normal,
                         ),
                       ),
-                      SizedBox(height: 30),
+                      const SizedBox(height: 30),
                       CustomTextField(
                         controller: _nameController,
                         label: "Nama Lengkap",
@@ -127,10 +127,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           onPressed: _register,
                           child: _isLoading
-                              ? SizedBox(
+                              ? const SizedBox(
                                   height: 21,
                                   width: 21,
-                                  child: const CircularProgressIndicator(
+                                  child: CircularProgressIndicator(
                                     color: Colors.white,
                                   ),
                                 )
@@ -139,15 +139,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       fontSize: 15, color: Colors.white)),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       RichText(
                           text: TextSpan(
                         text: "Sudah punya akun? ",
-                        style: TextStyle(color: Colors.black),
+                        style: const TextStyle(color: Colors.black),
                         children: [
                           TextSpan(
                               text: "Masuk",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: oren,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -157,7 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 }),
                         ],
                       )),
-                      SizedBox(height: 300),
+                      const SizedBox(height: 300),
                     ],
                   ),
                 ),

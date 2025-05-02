@@ -3,12 +3,51 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constans.dart';
 import 'dart:io';
-import 'package:path/path.dart'; // Import the path package for basename
-import 'package:http_parser/http_parser.dart'; // Import MediaType from http_parser
-import 'package:firebase_messaging/firebase_messaging.dart'; // Import FirebaseMessaging
+import 'package:path/path.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class ApiService {
-  // Method untuk login
+  static Future<Map<String, dynamic>> loginWithGoogle() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+
+    await googleSignIn.signOut();
+
+    final googleUser = await googleSignIn.signIn();
+
+    if (googleUser == null) {
+      throw Exception("Login dibatalkan oleh pengguna");
+    }
+
+    final googleAuth = await googleUser.authentication;
+    final idToken = googleAuth.idToken;
+
+    if (idToken == null) {
+      throw Exception("ID Token tidak ditemukan");
+    }
+
+    final response = await http.post(
+      Uri.parse("$BASE_URL/auth/google"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "id_token": idToken,
+      }),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+
+      await saveUserToken(data['token']);
+
+      await sendFcmTokenToLaravel(data['token']);
+
+      return data;
+    } else {
+      throw Exception("Login Google gagal");
+    }
+  }
+
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
     final response = await http.post(
@@ -17,17 +56,22 @@ class ApiService {
       body: jsonEncode({"email": email, "password": password}),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      await saveUserToken(data['token']); // Simpan user_token
-      await sendFcmTokenToLaravel(data['token']); // Kirim fcm_token ke Laravel
+      await saveUserToken(data['token']);
+      await sendFcmTokenToLaravel(data['token']);
       return data;
+    } else if (response.statusCode == 401) {
+      throw Exception("Email atau password salah");
+    } else if (response.statusCode == 422) {
+      final error = jsonDecode(response.body);
+      final message = error['message'] ?? "Validasi gagal";
+      throw Exception(message);
     } else {
-      throw Exception("Login gagal");
+      throw Exception("Login gagal (${response.statusCode})");
     }
   }
 
-  // Method untuk register
   static Future<Map<String, dynamic>> register(
       String name, String email, String password) async {
     final response = await http.post(
@@ -43,15 +87,14 @@ class ApiService {
 
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      await saveUserToken(data['token']); // Simpan user_token
-      await sendFcmTokenToLaravel(data['token']); // Kirim fcm_token ke Laravel
+      await saveUserToken(data['token']);
+      await sendFcmTokenToLaravel(data['token']);
       return data;
     } else {
       throw Exception("Registrasi gagal");
     }
   }
 
-  // Method untuk logout
   static Future<void> logout(String token) async {
     final response = await http.post(
       Uri.parse("$BASE_URL/logout"),
@@ -62,31 +105,26 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      await clearUserToken(); // Hapus user_token dari SharedPreferences
+      await clearUserToken();
     } else {
       throw Exception("Logout gagal");
     }
   }
 
-  // Fungsi untuk menyimpan user_token ke SharedPreferences
   static Future<void> saveUserToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_token', token);
     print('Token berhasil disimpan: $token');
   }
 
-  // Fungsi untuk menghapus user_token dari SharedPreferences
   static Future<void> clearUserToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_token');
-    print('Token berhasil dihapus');
   }
 
-  // Fungsi untuk mengirim fcm_token ke Laravel
   static Future<void> sendFcmTokenToLaravel(String userToken) async {
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken == null) {
-      print('FCM Token tidak tersedia');
       return;
     }
 
@@ -106,7 +144,6 @@ class ApiService {
     }
   }
 
-  // Method untuk mengambil data wilayah
   static Future<List<Map<String, dynamic>>> getWilayah() async {
     final response = await http.get(
       Uri.parse("$BASE_URL/wilayah"),
@@ -114,10 +151,8 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse =
-          jsonDecode(response.body); // Parse JSON
-      final List<dynamic> data =
-          jsonResponse['data']; // Ambil hanya bagian "data"
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      final List<dynamic> data = jsonResponse['data'];
 
       return data.map((item) => item as Map<String, dynamic>).toList();
     } else {
@@ -125,11 +160,10 @@ class ApiService {
     }
   }
 
-  // Method untuk menyimpan data user
   static Future<void> saveUserData(
       String token, int userId, Map<String, dynamic> data) async {
     final response = await http.post(
-      Uri.parse("$BASE_URL/user-profile"), // Sesuaikan dengan endpoint API Anda
+      Uri.parse("$BASE_URL/user-profile"),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json"
@@ -189,7 +223,6 @@ class ApiService {
     }
   }
 
-  // Fungsi untuk memverifikasi OTP
   static Future<void> verifyOtp(String email, String otp) async {
     final url = Uri.parse("$BASE_URL/forgot-password/verify-otp");
     final response = await http.post(
@@ -204,7 +237,6 @@ class ApiService {
     }
   }
 
-  // Fungsi untuk mereset password
   static Future<void> resetPassword(String email, String otp, String password,
       String passwordConfirmation) async {
     final url = Uri.parse("$BASE_URL/forgot-password/reset");
@@ -240,7 +272,7 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
-          return data['data']; // Mengembalikan daftar event
+          return data['data'];
         } else {
           throw Exception(data['message'] ?? 'Gagal mengambil data.');
         }
@@ -253,7 +285,6 @@ class ApiService {
     }
   }
 
-  // Fetch default data for the user
   static Future<Map<String, dynamic>> fetchDefaultData(String token) async {
     final url = Uri.parse('$BASE_URL/pendaftars/default');
 
@@ -268,7 +299,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['data']; // Mengembalikan data default
+        return data['data'];
       } else {
         throw Exception(
             'Gagal mengambil data default. Status code: ${response.statusCode}');
@@ -278,7 +309,6 @@ class ApiService {
     }
   }
 
-  // Fungsi untuk mengirim data pendaftaran
   static Future<void> submitRegistrationWithFiles(
       String token, Map<String, dynamic> data, Map<String, File?> files) async {
     final url = Uri.parse('$BASE_URL/pendaftars/daftar');
@@ -290,14 +320,12 @@ class ApiService {
           'Accept': 'application/json',
         });
 
-      // Tambahkan data ke dalam request
       data.forEach((key, value) {
         if (value != null) {
           request.fields[key] = value.toString();
         }
       });
 
-      // Tambahkan file ke dalam request
       files.forEach((key, file) {
         if (file != null) {
           request.files.add(
@@ -312,14 +340,13 @@ class ApiService {
         }
       });
 
-      // Kirim request
       final response = await request.send();
 
       if (response.statusCode == 200) {
         final responseBody = await response.stream.bytesToString();
         final responseData = json.decode(responseBody);
         print('Response from server: $responseData');
-        // print(responseData);
+
         if (responseData['success'] != true) {
           throw Exception(responseData['message'] ?? 'Pendaftaran gagal.');
         }
@@ -349,7 +376,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body); // Mengembalikan respons JSON
+        return jsonDecode(response.body);
       } else {
         throw Exception(
             'Gagal memeriksa status pendaftaran. Status code: ${response.statusCode}');
@@ -374,13 +401,92 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['data']; // Mengembalikan daftar pengumuman
+        return data['data'];
       } else {
         throw Exception(
             'Gagal mengambil data pengumuman. Status code: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Terjadi kesalahan saat mengambil data pengumuman: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>?> fetchLiturgiByDate(String date) async {
+    final String apiUrl = "$BASE_URL/kalender-liturgi/by-date?date=$date";
+    print('date: $date');
+    print('apiUrl: $apiUrl');
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('user_token');
+
+      if (token == null) {
+        throw Exception("Token tidak ditemukan. Harap login kembali.");
+      }
+
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'];
+        } else {
+          return null;
+        }
+      } else {
+        throw Exception(
+            "Gagal mengambil data liturgi (${response.statusCode})");
+      }
+    } catch (e) {
+      throw Exception("Terjadi kesalahan: $e");
+    }
+  }
+
+  static Future<List<dynamic>> fetchTextMisa() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('user_token');
+
+    if (token == null) {
+      throw Exception("Token tidak ditemukan. Harap login kembali.");
+    }
+
+    final response = await http.get(
+      Uri.parse('$BASE_URL/text-misa'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        return data['data'];
+      } else {
+        throw Exception("Gagal mengambil data text misa.");
+      }
+    } else {
+      throw Exception("Error: ${response.statusCode}");
+    }
+  }
+
+  static Future<List<int>> downloadFile(String url) async {
+    print("Mengunduh file dari URL: $url");
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      print("File berhasil diunduh.");
+      return response.bodyBytes;
+    } else {
+      print("Gagal mengunduh file. Status code: ${response.statusCode}");
+      throw Exception('Gagal mengunduh file: ${response.statusCode}');
     }
   }
 }

@@ -194,14 +194,14 @@ class _UserDataScreenState extends State<UserDataScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Sukses'),
-          content: Text('Data berhasil disimpan'),
+          title: const Text('Sukses'),
+          content: const Text('Data berhasil disimpan'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -261,7 +261,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
-                      Row(
+                      const Row(
                         children: [
                           Text.rich(
                             TextSpan(
@@ -347,7 +347,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
                           ),
                           onPressed: _submitForm,
                           child: _isLoading
-                              ? SizedBox(
+                              ? const SizedBox(
                                   height: 21,
                                   width: 21,
                                   child: const CircularProgressIndicator(
@@ -374,7 +374,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
       child: Theme(
         data: ThemeData(
           primaryColor: oren,
-          colorScheme: ColorScheme.light(primary: oren),
+          colorScheme: const ColorScheme.light(primary: oren),
         ),
         child: DropdownButtonFormField<String>(
           value: _selectedJenisKelamin,
@@ -420,7 +420,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
       child: Theme(
         data: ThemeData(
           primaryColor: oren,
-          colorScheme: ColorScheme.light(primary: oren),
+          colorScheme: const ColorScheme.light(primary: oren),
         ),
         child: TextFormField(
           controller: controller,
@@ -462,7 +462,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
           child: Theme(
             data: ThemeData(
               primaryColor: oren,
-              colorScheme: ColorScheme.light(primary: oren),
+              colorScheme: const ColorScheme.light(primary: oren),
             ),
             child: TextFormField(
               controller: controller,
@@ -500,7 +500,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
       child: Theme(
         data: ThemeData(
           primaryColor: oren,
-          colorScheme: ColorScheme.light(primary: oren),
+          colorScheme: const ColorScheme.light(primary: oren),
         ),
         child: DropdownButtonFormField<String>(
           value: _selectedKelurahanId,
@@ -547,7 +547,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
       child: Theme(
         data: ThemeData(
           primaryColor: oren,
-          colorScheme: ColorScheme.light(primary: oren),
+          colorScheme: const ColorScheme.light(primary: oren),
         ),
         child: DropdownButtonFormField<String>(
           value: value,

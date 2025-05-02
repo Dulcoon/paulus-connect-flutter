@@ -11,7 +11,7 @@ class RegistrationStatusScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Status Pendaftaran'),
+        title: const Text('Status Pendaftaran'),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
@@ -21,17 +21,17 @@ class RegistrationStatusScreen extends StatelessWidget {
           children: [
             Text(
               'Status Pendaftaran: $status',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             if (status == 'ditolak' && alasan != null) ...[
-              SizedBox(height: 10),
-              Text(
+              const SizedBox(height: 10),
+              const Text(
                 'Alasan Penolakan:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
                 alasan!,
-                style: TextStyle(fontSize: 16, color: Colors.red),
+                style: const TextStyle(fontSize: 16, color: Colors.red),
               ),
             ],
           ],

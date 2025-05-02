@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
@@ -15,14 +14,14 @@ import 'screens/forgot_password_email_screen.dart';
 import 'screens/verify_otp_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'sakramen/sakramen_event_list.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'utils/constans.dart';
 import 'sakramen/sakramen_event_detail.dart';
 import 'doa/list_doa_screen.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'kalender-liturgi/kalender-liturgi.dart';
+import 'text-misa/text_misa_list.dart';
+import 'alkitab/alkitab.dart';
 
-// Inisialisasi plugin notifikasi lokal
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
@@ -31,12 +30,12 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Inisialisasi notifikasi lokal
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
   const InitializationSettings initializationSettings =
@@ -46,7 +45,6 @@ Future<void> main() async {
   RemoteMessage? initialMessage =
       await FirebaseMessaging.instance.getInitialMessage();
   if (initialMessage != null) {
-    print('Aplikasi dibuka dari notifikasi: ${initialMessage.data}');
     if (initialMessage.data['action'] == 'view_sakramen_event') {
       final sakramenEventId = initialMessage.data['sakramen_event_id'];
       if (sakramenEventId != null) {
@@ -73,14 +71,17 @@ Future<void> main() async {
         theme: ThemeData(fontFamily: 'Poppins'),
         initialRoute: '/login',
         routes: {
-          '/register': (context) => RegisterScreen(),
-          '/login': (context) => LoginScreen(),
+          '/register': (context) => const RegisterScreen(),
+          '/login': (context) => const LoginScreen(),
           '/home': (context) => HomeScreen(),
-          '/artikel': (context) => ArtikelScreen(),
-          '/userData': (context) => UserDataScreen(),
-          '/doa': (context) => ListDoaScreen(),
+          '/artikel': (context) => const ArtikelScreen(),
+          '/userData': (context) => const UserDataScreen(),
+          '/doa': (context) => const ListDoaScreen(),
           '/sakramen-list': (context) => SakramenEventList(),
           '/forgot-password': (context) => ForgotPasswordEmailScreen(),
+          '/kalender-liturgi': (context) => const KalenderLiturgiScreen(),
+          '/alkitab': (context) => const AlkitabScreen(),
+          '/text-misa': (context) => const TextMisaList(),
           '/verify-otp': (context) => VerifyOtpScreen(
                 email: ModalRoute.of(context)!.settings.arguments as String,
               ),
@@ -104,7 +105,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       notification.hashCode,
       notification.title,
       notification.body,
-      NotificationDetails(
+      const NotificationDetails(
         android: AndroidNotificationDetails(
           'default_channel',
           'Default',
@@ -114,8 +115,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       ),
     );
   } else if (message.data.isNotEmpty) {
-    print('terkirimPesan');
-    // Menampilkan notifikasi manual untuk Data Message
     flutterLocalNotificationsPlugin.show(
       message.hashCode,
       message.data['title'] ?? 'Judul Default',
@@ -127,32 +126,25 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           importance: Importance.max,
           priority: Priority.high,
           styleInformation: BigTextStyleInformation(
-            message.data['body'] ??
-                'Isi Default', // Teks lengkap untuk notifikasi
-            contentTitle: message.data['title'] ?? 'Judul Default', // Judul
-            htmlFormatContent: true, // Jika ingin mendukung HTML
-            htmlFormatContentTitle: true, // Jika ingin mendukung HTML di judul
+            message.data['body'] ?? 'Isi Default',
+            contentTitle: message.data['title'] ?? 'Judul Default',
+            htmlFormatContent: true,
+            htmlFormatContentTitle: true,
           ),
         ),
       ),
     );
   }
-
-  print('Handling background message: ${message.messageId}');
 }
 
-// Fungsi untuk mengatur Firebase Cloud Messaging (FCM)
 void setupFCM() async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // Dapatkan FCM token
   String? token = await messaging.getToken();
   print("FCM Token: $token");
 
-  // Menangani pesan FCM di background
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Menangani pesan FCM saat aplikasi berjalan di foreground
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
@@ -169,18 +161,15 @@ void setupFCM() async {
             importance: Importance.max,
             priority: Priority.high,
             styleInformation: BigTextStyleInformation(
-              message.data['body'] ??
-                  'Isi Default', // Teks lengkap untuk notifikasi
-              contentTitle: message.data['title'] ?? 'Judul Default', // Judul
-              htmlFormatContent: true, // Jika ingin mendukung HTML
-              htmlFormatContentTitle:
-                  true, // Jika ingin mendukung HTML di judul
+              message.data['body'] ?? 'Isi Default',
+              contentTitle: message.data['title'] ?? 'Judul Default',
+              htmlFormatContent: true,
+              htmlFormatContentTitle: true,
             ),
           ),
         ),
       );
     } else if (message.data.isNotEmpty) {
-      // Menampilkan notifikasi manual untuk Data Message
       flutterLocalNotificationsPlugin.show(
         message.hashCode,
         message.data['title'] ?? 'Judul Default',
@@ -192,12 +181,10 @@ void setupFCM() async {
             importance: Importance.max,
             priority: Priority.high,
             styleInformation: BigTextStyleInformation(
-              message.data['body'] ??
-                  'Isi Default', // Teks lengkap untuk notifikasi
-              contentTitle: message.data['title'] ?? 'Judul Default', // Judul
-              htmlFormatContent: true, // Jika ingin mendukung HTML
-              htmlFormatContentTitle:
-                  true, // Jika ingin mendukung HTML di judul
+              message.data['body'] ?? 'Isi Default',
+              contentTitle: message.data['title'] ?? 'Judul Default',
+              htmlFormatContent: true,
+              htmlFormatContentTitle: true,
             ),
           ),
         ),
@@ -205,19 +192,15 @@ void setupFCM() async {
     }
   });
 
-  // Menangani notifikasi yang membuka aplikasi
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print('❗❗❗❗❗❗❗❗❗❗❗❗❗');
-
     if (message.data['action'] == 'view_sakramen_event') {
       final sakramenEventId = message.data['sakramen_event_id'];
       if (sakramenEventId != null) {
-        // Navigasi ke halaman detail sakramen
         Navigator.push(
           navigatorKey.currentContext!,
           MaterialPageRoute(
             builder: (context) => SakramenEventDetail(
-              event: {'id': sakramenEventId}, // Kirim data event
+              event: {'id': sakramenEventId},
             ),
           ),
         );

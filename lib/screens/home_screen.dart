@@ -1,35 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:paulus_connect/alkitab/alkitab.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constans.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'profile_screen.dart';
-import 'task_screen.dart';
-import 'favorite_screen.dart';
 import '../services/api_service.dart';
 import 'pengumuman_detail_screen.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'bottom_navbar.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0; // Indeks halaman aktif
+  int _currentIndex = 1;
 
-  // Daftar halaman
   final List<Widget> _pages = [
-    HomeContent(),
-    TaskScreen(),
-    FavoriteScreen(),
+    const AlkitabScreen(),
+    const HomeContent(),
     ProfileScreen(),
-  ];
-
-  final iconList = <IconData>[
-    Icons.home,
-    Icons.task,
-    Icons.favorite,
-    Icons.person,
   ];
 
   @override
@@ -37,20 +31,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: bgCollor,
       body: _pages[_currentIndex],
-      bottomNavigationBar: AnimatedBottomNavigationBar(
-        icons: iconList,
-        activeIndex: _currentIndex,
-        splashColor: oren,
-        gapLocation: GapLocation.none,
-        leftCornerRadius: 32,
-        rightCornerRadius: 32,
+      bottomNavigationBar: BottomNavbar(
+        currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        activeColor: oren,
-        inactiveColor: Colors.grey,
       ),
     );
   }
@@ -88,7 +75,7 @@ class CompletionPrompt extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Lengkapi data diri anda',
                       style: TextStyle(
                         fontSize: 13.5,
@@ -96,7 +83,7 @@ class CompletionPrompt extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'Dan nikmati semua fitur Paulus Connect',
                       style: TextStyle(
                         fontSize: 11,
@@ -115,7 +102,7 @@ class CompletionPrompt extends StatelessWidget {
                           ),
                         ),
                         onPressed: onPressed,
-                        child: Row(
+                        child: const Row(
                           children: [
                             Text(
                               'Lengkapi Sekarang',
@@ -125,7 +112,7 @@ class CompletionPrompt extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            const Expanded(
+                            Expanded(
                               child: Icon(
                                 Icons.arrow_forward,
                                 color: Colors.black,
@@ -155,6 +142,8 @@ class CompletionPrompt extends StatelessWidget {
 }
 
 class UnCompletionPrompt extends StatelessWidget {
+  const UnCompletionPrompt({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -177,7 +166,7 @@ class UnCompletionPrompt extends StatelessWidget {
           ),
           child: const Row(
             children: [
-              const SizedBox(width: 115),
+              SizedBox(width: 115),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +187,7 @@ class UnCompletionPrompt extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                   ],
                 ),
               ),
@@ -243,12 +232,14 @@ class _HomeContentState extends State<HomeContent> {
     if (token != null) {
       try {
         final data = await ApiService.fetchPengumuman(token);
+        if (!mounted) return; // Pastikan widget masih ada di tree
         setState(() {
           _pengumuman = data;
           _isLoading = false;
         });
       } catch (e) {
         print('Error fetching pengumuman: $e');
+        if (!mounted) return; // Pastikan widget masih ada di tree
         setState(() {
           _isLoading = false;
         });
@@ -262,12 +253,9 @@ class _HomeContentState extends State<HomeContent> {
     });
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider
-        .fetchUserData(); // Assuming you have a method to fetch user data
+    await authProvider.fetchUserData();
 
-    if (!mounted)
-      return; // Check if the widget is still mounted before calling setState
-
+    if (!mounted) return; // Pastikan widget masih ada di tree
     setState(() {
       _isLoading = false;
     });
@@ -279,17 +267,16 @@ class _HomeContentState extends State<HomeContent> {
     final isCompleted = authProvider.user?.isCompleted == 1;
 
     return _isLoading
-        ? Center(
+        ? const Center(
             child: CircularProgressIndicator(
             color: oren,
           ))
         : SafeArea(
             child: RefreshIndicator(
               color: oren,
-              onRefresh: _fetchPengumuman, // Tambahkan fungsi refresh
+              onRefresh: _fetchPengumuman,
               child: SingleChildScrollView(
-                physics:
-                    const AlwaysScrollableScrollPhysics(), // Agar bisa di-scroll meskipun konten sedikit
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: Column(
@@ -350,7 +337,7 @@ class _HomeContentState extends State<HomeContent> {
                             Navigator.pushNamed(context, '/userData');
                           },
                         ),
-                      if (isCompleted) UnCompletionPrompt(),
+                      if (isCompleted) const UnCompletionPrompt(),
                       const SizedBox(height: 40),
                       Column(
                         children: [
@@ -368,9 +355,9 @@ class _HomeContentState extends State<HomeContent> {
                               _buildIconButton(
                                 imagePath:
                                     'assets/images/pin-dynamic-color.png',
-                                label: 'Intensi Misa',
+                                label: 'Text Misa',
                                 onPressed: () {
-                                  Navigator.pushNamed(context, '/login');
+                                  Navigator.pushNamed(context, '/text-misa');
                                 },
                                 imageWidth: 56,
                               ),
@@ -385,7 +372,8 @@ class _HomeContentState extends State<HomeContent> {
                                     'assets/images/calender-dynamic-color.png',
                                 label: 'Kalender Liturgi',
                                 onPressed: () {
-                                  Navigator.pushNamed(context, '/login');
+                                  Navigator.pushNamed(
+                                      context, '/kalender-liturgi');
                                 },
                               ),
                               _buildIconButton(
@@ -414,14 +402,14 @@ class _HomeContentState extends State<HomeContent> {
                           ),
                           const SizedBox(height: 15),
                           if (_isLoading)
-                            Center(
+                            const Center(
                                 child: CircularProgressIndicator(color: oren))
                           else if (_pengumuman.isEmpty)
                             const Text('Tidak ada pengumuman saat ini.')
                           else
                             ListView.builder(
                               shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               itemCount: _pengumuman.length,
                               itemBuilder: (context, index) {
                                 final pengumuman = _pengumuman[index];
@@ -460,10 +448,6 @@ class _HomeContentState extends State<HomeContent> {
       children: [
         ElevatedButton(
           onPressed: onPressed,
-          child: Image.asset(
-            imagePath,
-            width: imageWidth ?? 70,
-          ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
@@ -471,6 +455,10 @@ class _HomeContentState extends State<HomeContent> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+          ),
+          child: Image.asset(
+            imagePath,
+            width: imageWidth ?? 70,
           ),
         ),
         const SizedBox(height: 4),
@@ -484,10 +472,17 @@ class _HomeContentState extends State<HomeContent> {
     required VoidCallback onPressed,
   }) {
     return Padding(
-      padding:
-          const EdgeInsets.only(bottom: 10.0), // Tambahkan jarak antar card
+      padding: const EdgeInsets.only(bottom: 10.0),
       child: ElevatedButton(
         onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 15),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
         child: Row(
           children: [
             Expanded(
@@ -496,17 +491,16 @@ class _HomeContentState extends State<HomeContent> {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.black,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
-                    maxLines: 1, // Batasi hanya 1 baris
-                    overflow: TextOverflow
-                        .ellipsis, // Tambahkan ... jika teks terlalu panjang
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 5),
-                  Row(
+                  const Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
@@ -527,14 +521,6 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
           ],
-        ),
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 15),
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
         ),
       ),
     );

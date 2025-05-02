@@ -47,7 +47,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Reset Password')),
+      appBar: AppBar(title: const Text('Reset Password')),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Form(
@@ -56,7 +56,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             children: [
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password Baru'),
+                decoration: const InputDecoration(labelText: 'Password Baru'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -68,10 +68,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _confirmPasswordController,
-                decoration: InputDecoration(labelText: 'Konfirmasi Password'),
+                decoration:
+                    const InputDecoration(labelText: 'Konfirmasi Password'),
                 obscureText: true,
                 validator: (value) {
                   if (value != _passwordController.text) {
@@ -85,19 +86,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   padding: const EdgeInsets.only(top: 10),
                   child: Text(
                     _errorMessage!,
-                    style: TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _isLoading
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           _resetPassword();
                         }
                       },
-                      child: Text('Reset Password'),
+                      child: const Text('Reset Password'),
                     ),
             ],
           ),

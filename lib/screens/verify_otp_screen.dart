@@ -43,29 +43,29 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Verifikasi OTP')),
+      appBar: AppBar(title: const Text('Verifikasi OTP')),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             TextField(
               controller: _otpController,
-              decoration: InputDecoration(labelText: 'Kode OTP'),
+              decoration: const InputDecoration(labelText: 'Kode OTP'),
             ),
             if (_errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(
                   _errorMessage!,
-                  style: TextStyle(color: Colors.red),
+                  style: const TextStyle(color: Colors.red),
                 ),
               ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _isLoading
-                ? CircularProgressIndicator()
+                ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _verifyOtp,
-                    child: Text('Verifikasi'),
+                    child: const Text('Verifikasi'),
                   ),
           ],
         ),

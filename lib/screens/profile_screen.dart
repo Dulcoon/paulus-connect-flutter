@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: bgCollor,
       body: _isLoading
-          ? Center(
+          ? const Center(
               child: CircularProgressIndicator(
               color: oren,
             ))
@@ -55,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Container(
                         width: double.infinity,
                         height: 280,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           image: DecorationImage(
                             image: AssetImage('assets/images/Vector.png'),
                             fit: BoxFit.cover,
@@ -70,8 +70,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
                             children: [
-                              SizedBox(height: 30),
-                              Row(
+                              const SizedBox(height: 30),
+                              const Row(
                                 children: [
                                   Text(
                                     'User Profile',
@@ -83,15 +83,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               Column(
                                 children: [
-                                  CircleAvatar(
+                                  const CircleAvatar(
                                     radius: 40,
                                     backgroundImage:
                                         AssetImage('assets/images/user.png'),
                                   ),
-                                  SizedBox(width: 20),
+                                  const SizedBox(width: 20),
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
@@ -118,14 +118,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(height: 20),
-                            Row(
+                            const SizedBox(height: 20),
+                            const Row(
                               children: [
                                 Text(
                                   'Data Diri',
@@ -145,29 +145,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Nama Lengkap', userProfile?['nama_lengkap']),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Nomor HP', userProfile?['no_hp']),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Tempat Lahir', userProfile?['tempat_lahir']),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Tanggal Lahir', userProfile?['tanggal_lahir']),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Jenis Kelamin', userProfile?['kelamin']),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Nama Ayah', userProfile?['nama_ayah']),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Nama Ibu', userProfile?['nama_ibu']),
-                            SizedBox(height: 40),
-                            Row(
+                            const SizedBox(height: 40),
+                            const Row(
                               children: [
                                 Text(
                                   'Alamat',
@@ -187,20 +187,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField('Kecamatan',
                                 userProfile?['kecamatan_tempat_tinggal']),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Kelurahan', userProfile?['nama_wilayah']),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField('Alamat Lengkap',
                                 userProfile?['alamat_lengkap']),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Lingkungan', userProfile?['lingkungan']),
-                            SizedBox(height: 40),
-                            Row(
+                            const SizedBox(height: 40),
+                            const Row(
                               children: [
                                 Text(
                                   'Data Sakramen',
@@ -220,53 +220,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Sudah Baptis', userProfile?['sudah_baptis']),
                             if (userProfile?['sudah_baptis'] == 'sudah') ...[
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               _buildProfileField('Tanggal Baptis',
                                   userProfile?['tanggal_baptis']),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               _buildProfileField('Tempat Baptis',
                                   userProfile?['tempat_baptis']),
                             ],
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Sudah Komuni', userProfile?['sudah_komuni']),
                             if (userProfile?['sudah_komuni'] == 'sudah') ...[
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               _buildProfileField('Tanggal Komuni',
                                   userProfile?['tanggal_komuni']),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               _buildProfileField('Tempat Komuni',
                                   userProfile?['tempat_komuni']),
                             ],
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             _buildProfileField(
                                 'Sudah Krisma', userProfile?['sudah_krisma']),
                             if (userProfile?['sudah_krisma'] == 'sudah') ...[
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               _buildProfileField('Tanggal Krisma',
                                   userProfile?['tanggal_krisma']),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               _buildProfileField('Tempat Krisma',
                                   userProfile?['tempat_krisma']),
                             ],
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: () {
                                 // Navigate to edit profile screen
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: oren, // Background color
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                     horizontal: 50, vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                               ),
-                              child: Text(
+                              child: const Text(
                                 'Edit Profile',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -274,7 +274,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                             ),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: () {
                                 final authProvider = Provider.of<AuthProvider>(
@@ -283,18 +283,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 authProvider.logout();
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
-                                      builder: (context) => LoginScreen()),
+                                      builder: (context) =>
+                                          const LoginScreen()),
                                 );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red, // Background color
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                     horizontal: 50, vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                               ),
-                              child: Text(
+                              child: const Text(
                                 'Logout',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -302,7 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                                 height: 20), // Add some space at the bottom
                           ],
                         ),
@@ -316,12 +317,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'Anda belum mengisi profile-data anda, silahkan ke halaman home dan klik "lengkapi sekarang"',
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 16, color: Colors.red),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
                             final authProvider = Provider.of<AuthProvider>(
@@ -330,18 +331,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             authProvider.logout();
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                  builder: (context) => LoginScreen()),
+                                  builder: (context) => const LoginScreen()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red, // Background color
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 5),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                          child: Text(
+                          child: const Text(
                             'Logout',
                             style: TextStyle(
                               color: Colors.white,
@@ -359,7 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileField(String label, String? value) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
@@ -369,15 +370,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Text(
             '$label: ',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w800,
             ),
           ),
-          SizedBox(height: 3),
+          const SizedBox(height: 3),
           Text(
             value ?? '',
-            style: TextStyle(fontSize: 18),
+            style: const TextStyle(fontSize: 18),
           ),
         ],
       ),

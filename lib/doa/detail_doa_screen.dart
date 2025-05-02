@@ -11,12 +11,13 @@ class DetailDoaScreen extends StatefulWidget {
   final String content;
 
   const DetailDoaScreen({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
-  }) : super(key: key);
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _DetailDoaScreenState createState() => _DetailDoaScreenState();
 }
 
@@ -50,7 +51,7 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
     print(
         "Menjadwalkan notifikasi untuk $title pada ${time.hour}:${time.minute}");
 
-    var androidDetails = AndroidNotificationDetails(
+    var androidDetails = const AndroidNotificationDetails(
       'channelId',
       'channelName',
       importance: Importance.high,
@@ -233,7 +234,8 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
                         borderRadius: BorderRadius.circular(15),
                       ),
                       alignment: Alignment.center,
-                      child: Icon(CupertinoIcons.back, color: Colors.white),
+                      child:
+                          const Icon(CupertinoIcons.back, color: Colors.white),
                     ),
                   ),
                 ),
@@ -244,7 +246,7 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 50),
                   child: Text(
                     widget.title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -335,8 +337,9 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
                       ),
                       ElevatedButton.icon(
                         onPressed: _stop,
-                        icon: Icon(Icons.stop_circle, color: Colors.white),
-                        label: Text("Stop"),
+                        icon:
+                            const Icon(Icons.stop_circle, color: Colors.white),
+                        label: const Text("Stop"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
@@ -350,7 +353,8 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
                             icon: Icon(Icons.text_decrease,
                                 color: _isPlaying ? Colors.grey : Colors.black),
                           ),
-                          Text("Ukuran Teks", style: TextStyle(fontSize: 16)),
+                          const Text("Ukuran Teks",
+                              style: TextStyle(fontSize: 16)),
                           IconButton(
                             onPressed: _isPlaying ? null : _increaseFontSize,
                             icon: Icon(Icons.text_increase,

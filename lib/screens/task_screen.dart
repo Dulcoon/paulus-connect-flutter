@@ -5,9 +5,9 @@ class TaskScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Task'),
+        title: const Text('Task'),
       ),
-      body: Center(
+      body: const Center(
         child: Text(
           'Halaman Task',
           style: TextStyle(fontSize: 24),

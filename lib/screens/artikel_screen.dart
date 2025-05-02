@@ -12,7 +12,7 @@ class _ArtikelScreenState extends State<ArtikelScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Artikel'),
+        title: const Text('Artikel'),
       ),
       body: SafeArea(
           child: SingleChildScrollView(

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'detail_doa_screen.dart'; // Import halaman detail doa
+import 'detail_doa_screen.dart';
 import '../utils/constans.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'dart:convert';
 
 class ListDoaScreen extends StatefulWidget {
+  const ListDoaScreen({super.key});
+
   @override
   _ListDoaScreenState createState() => _ListDoaScreenState();
 }
@@ -18,25 +18,43 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
     {
       "title": "Aku Percaya",
       "content":
-          "Aku percaya akan Allah, Bapa yang Maha Kuasa, pencipta langit dan bumi..."
+          "Aku percaya akan Allah, Bapa yang Maha Kuasa, pencipta langit dan bumi dan akan Yesus Kristus, Putra-Nya yang tunggal Tuhan kita, yang dikandung dari Roh Kudus, dilahirkan oleh perawan Maria, yang menderita sengsara dalam pemerintahan Pontius Pilatus, disalibkan wafat dan dimakamkan, yang turun ke tempat penantian, pada hari ketiga bangkit dari antara orang mati, yang naik ke surga, duduk di sebelah kanan Allah Bapa yang Maha Kuasa, dari situ Ia akan datang mengadili orang yang hidup dan yang mati. Aku percaya akan Roh Kudus, gereja yang kudus dan am, persekutuan para kudus, pengampunan dosa, kebangkitan tubuh dan hidup kekal. Amin."
     },
     {
       "title": "Bapa Kami",
-      "content": "Bapa kami yang ada di surga, dimuliakanlah nama-Mu..."
+      "content":
+          "Bapa kami yang ada di surga, dimuliakanlah nama-Mu, datanglah kerajaan-Mu, jadilah kehendak-Mu di atas bumi seperti di dalam surga. Berilah kami rezeki pada hari ini, dan ampunilah kesalahan kami, seperti kami pun mengampuni yang bersalah kepada kami. Dan janganlah masukkan kami ke dalam pencobaan, tetapi lepaskanlah kami dari yang jahat. Amin."
     },
     {
       "title": "Salam Maria",
-      "content": "Salam Maria, penuh rahmat, Tuhan sertamu..."
+      "content":
+          "Salam Maria, penuh rahmat, Tuhan sertamu, terpujilah engkau di antara wanita dan terpujilah buah tubuhmu, Yesus. Santa Maria, Bunda Allah, doakanlah kami yang berdosa ini, sekarang dan pada waktu kami mati. Amin."
     },
     {
       "title": "Kemuliaan",
-      "content": "Kemuliaan kepada Bapa, dan Putra, dan Roh Kudus..."
+      "content":
+          "Kemuliaan kepada Bapa, dan Putra, dan Roh Kudus, seperti pada permulaan, sekarang, selalu, dan sepanjang segala abad. Amin."
+    },
+    {
+      "title": "Terpujhilah",
+      "content":
+          "Terpujilah engkau, ya Tuhan, Raja semesta alam, sebab dari kemurahan-Mu kami menerima roti yang kami siapkan ini. Kami persembahkan kepada-Mu, sebagai hasil dari bumi dan usaha manusia. Semoga menjadi bagi kami roti kehidupan."
+    },
+    {
+      "title": "Ya Yesus Yang Baik",
+      "content":
+          "Ya Yesus yang baik, ampunilah dosa-dosa kami, selamatkanlah kami dari Api neraka, dan bawalah jiwa-jiwa ke dalam surga, terutama mereka yang sangat membutuhkan Kerahimanmu-Mu. Amin."
+    },
+    {
+      "title": "Angelus",
+      "content":
+          "Maria diberi kabar oleh malaikat Tuhan, bahwa ia akan mengandung dari Roh Kudus, \nSalam Maria, penuh rahmat, Tuhan sertamu, terpujilah engkau di antara wanita dan terpujilah buah tubuhmu, Yesus. Santa Maria, Bunda Allah, doakanlah kami yang berdosa ini, sekarang dan pada waktu kami mati. Amin. \n Aku ini hamba Tuhan, Terjadilah padaku menurut perkataanmu, \nSalam Maria, penuh rahmat, Tuhan sertamu, terpujilah engkau di antara wanita dan terpujilah buah tubuhmu, Yesus. Santa Maria, Bunda Allah, doakanlah kami yang berdosa ini, sekarang dan pada waktu kami mati. Amin.\nSabda sudah menjadi daging, dan tinggal diantara kita,\nSalam Maria, penuh rahmat, Tuhan sertamu, terpujilah engkau di antara wanita dan terpujilah buah tubuhmu, Yesus. Santa Maria, Bunda Allah, doakanlah kami yang berdosa ini, sekarang dan pada waktu kami mati. Amin.\nDoakanlah kami Ya Santa Bunda Allah, supaya kami dapat menikmati janji kristus.\nYa Allah karna kabar Malaikat, kami mengetahui bahwa Yesus Kristus Putra-Mu menjadi manusia, curahkanlah rahmat-Mu kepada kami, supaya karena sengsara dan salib-Nya kami dibawa kepada kebangkitan yang Mulia, sebab Dia lah Tuhan dan Pengatara kami, Amin."
     },
   ];
 
-  List<String> personalDoa = []; // Doa pribadi yang ditambahkan user
-  List<String> favoriteDoa = []; // Doa favorit
-  Map<String, String> reminders = {}; // Pengingat untuk doa
+  List<String> personalDoa = [];
+  List<String> favoriteDoa = [];
+  Map<String, String> reminders = {};
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -48,14 +66,50 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
     _loadFavorites();
     _loadPersonalDoa();
     _loadReminders();
+
+    // Tambahkan pengingat default untuk doa Angelus
+    _setDefaultAngelusReminders();
   }
 
   void _initializeNotifications() {
-    var initializationSettingsAndroid =
+    const initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initializationSettings =
+    const initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        final payload = response.payload;
+        print("Payload: $payload"); // Debugging line to check the payload
+        if (payload != null) {
+          // Cari doa berdasarkan judul (payload)
+          final doa = allDoa.firstWhere(
+            (doa) => doa['title'] == payload,
+            orElse: () => {},
+          );
+
+          if (doa != null && doa['title'] != null && doa['content'] != null) {
+            // Navigasi ke halaman detail doa
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailDoaScreen(
+                  title: doa['title']!,
+                  content: doa['content']!,
+                ),
+              ),
+            );
+          } else {
+            print("Doa tidak ditemukan atau data tidak lengkap.");
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text("Doa tidak ditemukan atau data tidak lengkap")),
+            );
+          }
+        }
+      },
+    );
   }
 
   Future<void> _loadFavorites() async {
@@ -89,8 +143,7 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
   Future<void> _addPersonalDoa(String title, String content) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      personalDoa
-          .add("$title|$content"); // Gabungkan judul dan isi dengan pemisah "|"
+      personalDoa.add("$title|$content");
       prefs.setStringList('personalDoa', personalDoa);
     });
   }
@@ -117,26 +170,28 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
 
   Future<void> _addReminder(String title, TimeOfDay time) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String reminderKey = "reminder_$title";
-    String reminderValue = "${time.hour}:${time.minute}";
-    print(time);
+    String reminderKey =
+        "reminder_${title}_${time.hour}:${time.minute.toString().padLeft(2, '0')}";
+    String reminderValue =
+        "${time.hour}:${time.minute.toString().padLeft(2, '0')}";
 
     await prefs.setString(reminderKey, reminderValue);
 
     setState(() {
-      reminders[title] = reminderValue;
+      reminders[reminderKey] = reminderValue;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Pengingat untuk $title berhasil ditambahkan")),
+      SnackBar(
+          content: Text(
+              "Pengingat untuk $title berhasil ditambahkan pada ${time.hour}:${time.minute.toString().padLeft(2, '0')}")),
     );
 
-    _scheduleNotification(title, time);
-    print("Pengingat untuk $title disetel pada ${time.hour}:${time.minute}");
+    await _scheduleNotification(title, time);
   }
 
   Future<void> _scheduleNotification(String title, TimeOfDay time) async {
-    var androidDetails = AndroidNotificationDetails(
+    const androidDetails = AndroidNotificationDetails(
       'reminder_channel',
       'Pengingat Doa',
       channelDescription: 'Pengingat untuk berdoa',
@@ -144,9 +199,10 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
       priority: Priority.high,
       onlyAlertOnce: true,
     );
-    var platformDetails = NotificationDetails(android: androidDetails);
 
-    var now = tz.TZDateTime.now(tz.local);
+    final notificationDetails = NotificationDetails(android: androidDetails);
+
+    final now = tz.TZDateTime.now(tz.local);
     var scheduledTime = tz.TZDateTime(
       tz.local,
       now.year,
@@ -156,20 +212,22 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
       time.minute,
     );
 
-    // Jika waktu yang dijadwalkan sudah berlalu, jadwalkan untuk hari berikutnya
     if (scheduledTime.isBefore(now)) {
       scheduledTime = scheduledTime.add(Duration(days: 1));
     }
 
+    print(
+        "Sekarang: ${now.hour}:${now.minute}, Dijadwalkan: ${scheduledTime.hour}:${scheduledTime.minute}");
+
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      title.hashCode, // Unique ID
+      title.hashCode,
       'Pengingat Doa',
       'Saatnya berdoa: $title',
       scheduledTime,
-      platformDetails,
+      notificationDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-
       matchDateTimeComponents: DateTimeComponents.time,
+      payload: title,
     );
   }
 
@@ -180,6 +238,28 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
     });
     await prefs.remove('reminder_$title');
     print("Pengingat untuk $title dihapus.");
+  }
+
+  Future<void> _setDefaultAngelusReminders() async {
+    const angelusTitle = "Angelus";
+
+    // Waktu pengingat default
+    final times = [
+      const TimeOfDay(hour: 6, minute: 0), // 06:00
+      const TimeOfDay(hour: 12, minute: 0), // 12:00
+      const TimeOfDay(hour: 18, minute: 0), // 18:00
+    ];
+
+    // Periksa apakah pengingat untuk Angelus sudah ada
+    for (final time in times) {
+      final reminderKey =
+          "reminder_${angelusTitle}_${time.hour}:${time.minute.toString().padLeft(2, '0')}";
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (!prefs.containsKey(reminderKey)) {
+        // Tambahkan pengingat jika belum ada
+        await _addReminder(angelusTitle, time);
+      }
+    }
   }
 
   Widget _buildDoaList(List<Map<String, String>> doaList) {
@@ -196,7 +276,7 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
             children: [
               Text(title),
               if (hasReminder)
-                Icon(Icons.notifications, color: Colors.blue, size: 16),
+                const Icon(Icons.notifications, color: Colors.blue, size: 16),
             ],
           ),
           trailing: IconButton(
@@ -231,17 +311,28 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
       builder: (context) {
         return Wrap(
           children: [
+            // Opsi Hapus Doa
             ListTile(
-              leading: Icon(Icons.delete, color: Colors.red),
-              title: Text("Hapus Pengingat"),
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text("Hapus Doa"),
+              onTap: () {
+                Navigator.pop(context);
+                _deleteDoa(title);
+              },
+            ),
+            // Opsi Hapus Pengingat
+            ListTile(
+              leading: const Icon(Icons.notifications_off, color: Colors.red),
+              title: const Text("Hapus Pengingat"),
               onTap: () {
                 Navigator.pop(context);
                 _deleteReminder(title);
               },
             ),
+            // Opsi Tambah Pengingat
             ListTile(
-              leading: Icon(Icons.notifications, color: Colors.blue),
-              title: Text("Tambahkan Pengingat"),
+              leading: const Icon(Icons.notifications, color: Colors.blue),
+              title: const Text("Tambahkan Pengingat"),
               onTap: () {
                 Navigator.pop(context);
                 _showReminderDialog(title);
@@ -250,6 +341,23 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
           ],
         );
       },
+    );
+  }
+
+  Future<void> _deleteDoa(String title) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      // Hapus dari doa pribadi
+      personalDoa.removeWhere((doa) => doa.split('|')[0] == title);
+      prefs.setStringList('personalDoa', personalDoa);
+
+      // Hapus dari favorit jika ada
+      favoriteDoa.remove(title);
+      prefs.setStringList('favoriteDoa', favoriteDoa);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Doa \"$title\" berhasil dihapus")),
     );
   }
 
@@ -271,46 +379,26 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
       child: Scaffold(
         backgroundColor: bgCollor,
         appBar: AppBar(
-          title: Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: Text(
-                'Kumpulan Doa',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
-              ),
+          title: const Text(
+            'Kumpulan Doa',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
+            textAlign: TextAlign.center,
           ),
           backgroundColor: bgCollor,
           automaticallyImplyLeading: false,
-          leading: Padding(
-            padding: const EdgeInsets.all(9),
-            child: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              borderRadius: BorderRadius.circular(15),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: oren,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  CupertinoIcons.back,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            color: Colors.black,
           ),
-          bottom: TabBar(
+          centerTitle: true,
+          bottom: const TabBar(
             indicatorColor: oren,
             labelColor: oren,
             unselectedLabelColor: Colors.black54,
@@ -330,9 +418,38 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Anda belum memiliki doa pribadi"),
-                        SizedBox(height: 20),
-                        ElevatedButton(
+                        // Ilustrasi atau Ikon
+                        Icon(
+                          Icons.bookmark_border,
+                          size: 80,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Teks Informasi
+                        const Text(
+                          "Belum ada doa pribadi",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Teks Deskripsi
+                        const Text(
+                          "Tambahkan doa pribadi Anda untuk memulai.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black45,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+
+                        // Tombol Tambah Doa
+                        ElevatedButton.icon(
                           onPressed: () async {
                             final Map<String, String>? newDoa =
                                 await _showAddDoaDialog();
@@ -343,13 +460,27 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                                   newDoa['title']!, newDoa['content']!);
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        "Judul atau isi doa tidak boleh kosong")),
+                                const SnackBar(
+                                  content: Text(
+                                      "Judul atau isi doa tidak boleh kosong"),
+                                ),
                               );
                             }
                           },
-                          child: Text("Buat pengingat doa pribadi"),
+                          icon: const Icon(Icons.add, color: Colors.white),
+                          label: const Text(
+                            "Buat Doa Pribadi",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: oren,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 20),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -381,20 +512,20 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                                   newDoa['title']!, newDoa['content']!);
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                     content: Text(
                                         "Judul atau isi doa tidak boleh kosong")),
                               );
                             }
                           },
                           backgroundColor: oren,
-                          child: Icon(Icons.add, color: Colors.white),
+                          child: const Icon(Icons.add, color: Colors.white),
                         ),
                       ),
                     ],
                   ),
             favoriteDoa.isEmpty
-                ? Center(child: Text("Belum ada doa favorit"))
+                ? const Center(child: Text("Belum ada doa favorit"))
                 : _buildDoaList(
                     [
                       ...allDoa,
@@ -423,34 +554,149 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
     return showDialog<Map<String, String>>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text("Tambah Doa Pribadi"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                onChanged: (value) => title = value,
-                decoration: InputDecoration(hintText: "Masukkan judul doa"),
-              ),
-              SizedBox(height: 10),
-              TextField(
-                onChanged: (value) => content = value,
-                decoration: InputDecoration(hintText: "Masukkan isi doa"),
-                maxLines: 3,
-              ),
-            ],
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Batal"),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
             ),
-            TextButton(
-              onPressed: () =>
-                  Navigator.pop(context, {"title": title, "content": content}),
-              child: Text("Simpan"),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    const Icon(Icons.add, color: oren, size: 24),
+                    const SizedBox(width: 10),
+                    const Text(
+                      "Tambah Doa Pribadi",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Input untuk Judul Doa
+                const Text(
+                  "Judul Doa",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  onChanged: (value) => title = value,
+                  decoration: InputDecoration(
+                    hintText: "Masukkan judul doa",
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 15),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: oren),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Input untuk Isi Doa
+                const Text(
+                  "Isi Doa",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  onChanged: (value) => content = value,
+                  decoration: InputDecoration(
+                    hintText: "Masukkan isi doa",
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 15),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: oren),
+                    ),
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 20),
+
+                // Tombol Aksi
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.black54,
+                      ),
+                      child: const Text(
+                        "Batal",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (title.isEmpty || content.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Judul atau isi doa tidak boleh kosong",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        } else {
+                          Navigator.pop(context, {
+                            "title": title,
+                            "content": content,
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: oren,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        "Simpan",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );

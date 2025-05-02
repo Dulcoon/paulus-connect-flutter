@@ -86,7 +86,8 @@ class _SakramenRegistrationScreenState
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Token tidak valid. Silakan login ulang.')),
+        const SnackBar(
+            content: Text('Token tidak valid. Silakan login ulang.')),
       );
     }
   }
@@ -144,16 +145,11 @@ class _SakramenRegistrationScreenState
             'berkas_surat_baptis': _berkasSuratBaptis,
             'berkas_surat_komuni': _berkasSuratKomuni,
           };
-          print('Files to be uploaded:');
-          print('KK: ${_berkasKK?.path}');
-          print('Akta Kelahiran: ${_berkasAktaKelahiran?.path}');
-          print('Surat Baptis: ${_berkasSuratBaptis?.path}');
-          print('Surat Komuni: ${_berkasSuratKomuni?.path}');
 
           await ApiService.submitRegistrationWithFiles(token, data, files);
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Pendaftaran berhasil!')),
+            const SnackBar(content: Text('Pendaftaran berhasil!')),
           );
           Navigator.pushNamed(
               context, '/sakramen-list'); // Kembali ke halaman sebelumnya
@@ -164,7 +160,8 @@ class _SakramenRegistrationScreenState
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Token tidak valid. Silakan login ulang.')),
+          const SnackBar(
+              content: Text('Token tidak valid. Silakan login ulang.')),
         );
       }
     }
@@ -175,13 +172,13 @@ class _SakramenRegistrationScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text('Pendaftaran ${widget.event['jenis_sakramen']}',
-            style: TextStyle(color: Colors.white)),
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: oren,
         foregroundColor: Colors.white,
       ),
       backgroundColor: bgCollor,
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Form(
@@ -243,7 +240,7 @@ class _SakramenRegistrationScreenState
                     _buildTextField(_kelurahanController, 'Kelurahan'),
                     _buildTextField(_alamatLengkapController, 'Alamat Lengkap'),
                     _buildTextField(_lingkunganController, 'Lingkungan'),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     // File Uploaders
                     if (widget.event['jenis_sakramen'] == 'Baptis') ...[
@@ -253,7 +250,7 @@ class _SakramenRegistrationScreenState
                             ? 'Upload Berkas KK'
                             : 'Berkas KK Terpilih'),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => _pickFile('akta'),
                         child: Text(_berkasAktaKelahiran == null
@@ -267,14 +264,14 @@ class _SakramenRegistrationScreenState
                             ? 'Upload Berkas KK'
                             : 'Berkas KK Terpilih'),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => _pickFile('akta'),
                         child: Text(_berkasAktaKelahiran == null
                             ? 'Upload Akta Kelahiran'
                             : 'Akta Kelahiran Terpilih'),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => _pickFile('baptis'),
                         child: Text(_berkasSuratBaptis == null
@@ -288,21 +285,21 @@ class _SakramenRegistrationScreenState
                             ? 'Upload Berkas KK'
                             : 'Berkas KK Terpilih'),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => _pickFile('akta'),
                         child: Text(_berkasAktaKelahiran == null
                             ? 'Upload Akta Kelahiran'
                             : 'Akta Kelahiran Terpilih'),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => _pickFile('baptis'),
                         child: Text(_berkasSuratBaptis == null
                             ? 'Upload Surat Baptis'
                             : 'Surat Baptis Terpilih'),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => _pickFile('komuni'),
                         child: Text(_berkasSuratKomuni == null
@@ -310,18 +307,18 @@ class _SakramenRegistrationScreenState
                             : 'Surat Komuni Terpilih'),
                       ),
                     ],
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     ElevatedButton(
                       onPressed: _submitRegistration,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: oren,
-                        padding: EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Daftar',
                         style: TextStyle(color: Colors.white, fontSize: 16),
                       ),

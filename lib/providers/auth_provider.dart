@@ -33,6 +33,18 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> loginWithGoogle() async {
+    final Map<String, dynamic> response = await ApiService.loginWithGoogle();
+    if (response['token'] != null) {
+      _token = response['token'] as String;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', _token!);
+      notifyListeners();
+    } else {
+      throw Exception("Login gagal");
+    }
+  }
+
   Future<void> login(String email, String password) async {
     final response = await ApiService.login(email, password);
     _user = UserModel.fromJson(response['user']);

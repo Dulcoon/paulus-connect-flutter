@@ -5,7 +5,6 @@ import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import 'sakramen_event_detail.dart';
 import '../utils/constans.dart';
-import 'package:cupertino_icons/cupertino_icons.dart';
 
 class SakramenEventList extends StatefulWidget {
   @override
@@ -55,38 +54,25 @@ class _SakramenEventListState extends State<SakramenEventList> {
     return Scaffold(
       backgroundColor: bgCollor,
       appBar: AppBar(
-        title: Text('Daftar Event Sakramen Aktif',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            )),
+        title: const Text(
+          "Sakramen Aktif",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: bgCollor,
-        foregroundColor: Colors.white,
-        leading: Padding(
-          padding: const EdgeInsets.all(9), // Tambahkan padding untuk tombol
-          child: InkWell(
-            onTap: () {
-              Navigator.pop(
-                  context); // Aksi untuk kembali ke halaman sebelumnya
-            },
-            borderRadius: BorderRadius.circular(15), // Tambahkan border radius
-            child: Container(
-              margin: EdgeInsets.only(left: 0),
-              decoration: BoxDecoration(
-                color: Colors.white, // Warna latar belakang tombol
-                borderRadius: BorderRadius.circular(15), // Rounded border
-              ),
-              child: Icon(
-                CupertinoIcons.back, // Ikon back
-                color: Colors.black, // Warna ikon
-              ),
-            ),
+        centerTitle: true,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.black,
           ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
       ),
       body: _isLoading
-          ? Center(
+          ? const Center(
               child: CircularProgressIndicator(
               color: oren,
             ))
@@ -99,7 +85,7 @@ class _SakramenEventListState extends State<SakramenEventList> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(
+                          return const Center(
                               child: CircularProgressIndicator(
                             color: oren,
                           ));
@@ -107,12 +93,13 @@ class _SakramenEventListState extends State<SakramenEventList> {
                           return Center(
                             child: Text(
                               'Error: ${snapshot.error}',
-                              style: TextStyle(color: Colors.red),
+                              style: const TextStyle(color: Colors.red),
                             ),
                           );
                         } else if (!snapshot.hasData ||
                             snapshot.data!.isEmpty) {
-                          return Center(child: Text('Tidak ada event aktif.'));
+                          return const Center(
+                              child: Text('Tidak ada event aktif.'));
                         }
 
                         final events = snapshot.data!;
@@ -135,7 +122,8 @@ class _SakramenEventListState extends State<SakramenEventList> {
                               child: ListTile(
                                 title: Text(
                                   event['nama_event'],
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 subtitle: Text(
                                     'Jenis Sakramen: ${event['jenis_sakramen']}'),
@@ -145,7 +133,7 @@ class _SakramenEventListState extends State<SakramenEventList> {
                                     color: oren,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: Icon(Icons.arrow_forward,
+                                  child: const Icon(Icons.arrow_forward,
                                       color: Colors.white),
                                 ),
                                 onTap: () {
@@ -164,7 +152,7 @@ class _SakramenEventListState extends State<SakramenEventList> {
                         );
                       },
                     )
-                  : Center(
+                  : const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

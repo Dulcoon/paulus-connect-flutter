@@ -42,9 +42,9 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true, // Pastikan ini diatur ke true
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text('Lupa Password'),
+        title: const Text('Lupa Password'),
         backgroundColor: oren,
         foregroundColor: Colors.white,
       ),
@@ -65,12 +65,12 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
                         key: _formKey,
                         child: Column(
                           children: [
-                            Text(
+                            const Text(
                               'Kami akan mengirimkan kode OTP ke email Anda untuk mengatur ulang kata sandi.',
                               textAlign: TextAlign.center,
                               style: TextStyle(fontSize: 16),
                             ),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             CustomTextField(
                               primaryColor: oren,
                               borderColor: oren,
@@ -86,21 +86,19 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
                                 padding: const EdgeInsets.only(top: 10),
                                 child: Text(
                                   _errorMessage!,
-                                  style: TextStyle(color: Colors.red),
+                                  style: const TextStyle(color: Colors.red),
                                 ),
                               ),
                           ],
                         ),
                       ),
                     ),
-                    // Menambahkan ruang fleksibel agar tombol berada di bawah
                     Image.asset(
                       'assets/images/asking-question.png',
-                      height:
-                          300, // Sesuaikan ukuran gambar agar tidak terlalu besar
+                      height: 300,
                       width: 300,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: Container(
@@ -119,7 +117,7 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
                             }
                           },
                           child: _isLoading
-                              ? SizedBox(
+                              ? const SizedBox(
                                   height: 21,
                                   width: 21,
                                   child: const CircularProgressIndicator(

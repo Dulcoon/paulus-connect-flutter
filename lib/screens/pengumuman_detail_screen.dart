@@ -10,11 +10,11 @@ class PengumumanDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = '$BASE_URL_NO_API/images/${pengumuman['gambar']}';
+    print('Image URL: $imageUrl'); // Debugging line to check the image URL
 
     return Scaffold(
       body: Stack(
         children: [
-          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -29,7 +29,7 @@ class PengumumanDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Pengumuman Gereja',
@@ -40,8 +40,7 @@ class PengumumanDetailScreen extends StatelessWidget {
                           )),
                     ],
                   ),
-                  SizedBox(height: 12),
-                  // Gambar pengumuman
+                  const SizedBox(height: 12),
                   if (pengumuman['gambar'] != null)
                     ClipRRect(
                       borderRadius: const BorderRadius.only(
@@ -68,14 +67,11 @@ class PengumumanDetailScreen extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(height: 20),
-
-                  // Konten pengumuman
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Judul pengumuman
                         Text(
                           pengumuman['judul'],
                           style: const TextStyle(
@@ -85,8 +81,6 @@ class PengumumanDetailScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
-
-                        // Tanggal pengumuman
                         Row(
                           children: [
                             const Icon(
@@ -105,8 +99,6 @@ class PengumumanDetailScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 20),
-
-                        // Isi pengumuman dalam card
                         Card(
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -131,7 +123,6 @@ class PengumumanDetailScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Tombol kembali
           Positioned(
             top: 25,
             left: 16,

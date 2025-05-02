@@ -4,9 +4,6 @@ import '../providers/auth_provider.dart';
 import 'sakramen_registration_screen.dart';
 import '../utils/constans.dart';
 import '../services/api_service.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../utils/constans.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -93,7 +90,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
       final hasPermission = await _requestPermission();
       if (!hasPermission) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Izin penyimpanan ditolak')),
+          const SnackBar(content: Text('Izin penyimpanan ditolak')),
         );
         return;
       }
@@ -135,7 +132,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
           0,
           'Unduhan Selesai',
           'File berhasil diunduh',
-          NotificationDetails(
+          const NotificationDetails(
             android: AndroidNotificationDetails(
               'download_channel',
               'Download Progress',
@@ -211,20 +208,16 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
   }
 
   Future<int> _getAndroidVersion() async {
-    print('disini oy');
     final osVersion = Platform.operatingSystemVersion;
-    print('Operating System Version: $osVersion');
 
     // Gunakan regex untuk mengekstrak versi Android
     final match = RegExp(r'Android (\d+)').firstMatch(osVersion);
     if (match != null) {
       final version = int.tryParse(match.group(1) ?? '0') ?? 0;
-      print('Parsed Android Version: $version');
       return version;
     }
 
     // Jika tidak dapat diparsing, kembalikan 0 sebagai default
-    print('Failed to parse Android version');
     return 0;
   }
 
@@ -238,23 +231,24 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
         foregroundColor: Colors.white,
         title: Text(
           'Sakramen ${event['jenis_sakramen']}',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: oren,
         elevation: 0,
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Center(
                     child: Text(
                       event['nama_event']
                           .toUpperCase(), // Ubah teks menjadi uppercase
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
                       ),
@@ -262,7 +256,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                   ),
                   // Header dengan background hijau
 
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   // Detail Event
                   Padding(
@@ -282,7 +276,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   // Tombol atau Pesan
                   if (isSakramen(widget.event['jenis_sakramen']))
@@ -331,11 +325,11 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                               ),
                             ),
                             if (_alasan != null && _alasan!.isNotEmpty) ...[
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Center(
                                 child: Text(
                                   'Pesan: $_alasan',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.normal,
                                   ),
@@ -344,7 +338,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                               ),
                             ],
                             if (_status?.toLowerCase() == 'ditolak') ...[
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () {
                                   // Navigasi ke halaman pendaftaran ulang
@@ -360,12 +354,13 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: oren,
-                                  padding: EdgeInsets.symmetric(vertical: 15),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 15),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                child: Row(
+                                child: const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.edit, color: Colors.white),
@@ -383,7 +378,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                               ),
                             ],
                             if (_status?.toLowerCase() == 'selesai') ...[
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () async {
                                   print(widget.event['id']);
@@ -398,12 +393,13 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
-                                  padding: EdgeInsets.symmetric(vertical: 15),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 15),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                child: Row(
+                                child: const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.download, color: Colors.white),
@@ -441,12 +437,12 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: oren,
-                          padding: EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.edit, color: Colors.white),
@@ -463,7 +459,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                         ),
                       ),
                     ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -481,7 +477,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
             flex: 2, // Bagian kiri (label)
             child: Text(
               '$label:',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
@@ -492,7 +488,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
             flex: 3, // Bagian kanan (value)
             child: Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.black54,
               ),
