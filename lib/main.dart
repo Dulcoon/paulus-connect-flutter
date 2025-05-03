@@ -9,7 +9,8 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/artikel_screen.dart';
-import 'features/user_data_screen.dart';
+import 'user-profiles/user_data_screen.dart';
+import 'user-profiles/edit_user_profiles_screen.dart';
 import 'screens/forgot_password_email_screen.dart';
 import 'screens/verify_otp_screen.dart';
 import 'screens/reset_password_screen.dart';
@@ -76,6 +77,7 @@ Future<void> main() async {
           '/home': (context) => HomeScreen(),
           '/artikel': (context) => const ArtikelScreen(),
           '/userData': (context) => const UserDataScreen(),
+          '/editUserData': (context) => const EditUserProfileScreen(),
           '/doa': (context) => const ListDoaScreen(),
           '/sakramen-list': (context) => SakramenEventList(),
           '/forgot-password': (context) => ForgotPasswordEmailScreen(),

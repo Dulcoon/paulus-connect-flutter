@@ -21,7 +21,8 @@ class BottomNavbar extends StatelessWidget {
     ];
 
     return CurvedNavigationBar(
-      backgroundColor: bgCollor, // Warna latar belakang di atas navbar
+      backgroundColor:
+          Colors.transparent, // Warna latar belakang di atas navbar
       color: oren, // Warna aksen navbar
       buttonBackgroundColor: Colors.white, // Warna tombol tengah
       height: 60, // Tinggi navbar

@@ -193,6 +193,26 @@ class ApiService {
     }
   }
 
+  static Future<void> updateUserProfile(
+      String token, Map<String, dynamic> data) async {
+    final url = Uri.parse('$BASE_URL/user-profile/update');
+    print(token);
+    final response = await http.put(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update profile: ${response.body}');
+    }
+    print('Profile updated successfully: ${response.body}');
+  }
+
   static Future<Map<String, dynamic>> getUserProfile(String? token) async {
     final response = await http.get(
       Uri.parse("$BASE_URL/user-profile"),

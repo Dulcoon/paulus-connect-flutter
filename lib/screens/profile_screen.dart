@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'login_screen.dart';
+import '../user-profiles/edit_user_profiles_screen.dart';
 import '../utils/constans.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -50,266 +51,337 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ))
           : isCompleted
               ? SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: 280,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/Vector.png'),
-                            fit: BoxFit.cover,
+                  child: Stack(children: [
+                    Column(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 280,
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage('assets/images/Vector.png'),
+                              fit: BoxFit.cover,
+                            ),
+                            color: oren,
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(40),
+                              bottomRight: Radius.circular(40),
+                            ),
                           ),
-                          color: oren,
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(40),
-                            bottomRight: Radius.circular(40),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 30),
+                                const Row(
+                                  children: [
+                                    Text(
+                                      'User Profile',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                Column(
+                                  children: [
+                                    const CircleAvatar(
+                                      radius: 40,
+                                      backgroundImage:
+                                          AssetImage('assets/images/user.png'),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "${authProvider.user?.name}",
+                                          style: const TextStyle(
+                                            fontSize: 30,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${authProvider.user?.email}",
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        child: Padding(
+                        const SizedBox(height: 20),
+                        Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 20),
                               const Row(
                                 children: [
                                   Text(
-                                    'User Profile',
+                                    'Data Diri',
                                     style: TextStyle(
-                                      fontSize: 20,
-                                      color: Colors.white,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.bold,
+                                      color: oren,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Divider(
+                                      color: oren,
+                                      thickness: 1,
+                                      height: 30,
+                                      indent: 10,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 20),
-                              Column(
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Nama Lengkap', userProfile?['nama_lengkap']),
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Nomor HP', userProfile?['no_hp']),
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Tempat Lahir', userProfile?['tempat_lahir']),
+                              const SizedBox(height: 10),
+                              _buildProfileField('Tanggal Lahir',
+                                  userProfile?['tanggal_lahir']),
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Jenis Kelamin', userProfile?['kelamin']),
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Nama Ayah', userProfile?['nama_ayah']),
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Nama Ibu', userProfile?['nama_ibu']),
+                              const SizedBox(height: 40),
+                              const Row(
                                 children: [
-                                  const CircleAvatar(
-                                    radius: 40,
-                                    backgroundImage:
-                                        AssetImage('assets/images/user.png'),
+                                  Text(
+                                    'Alamat',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: oren,
+                                    ),
                                   ),
-                                  const SizedBox(width: 20),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "${authProvider.user?.name}",
-                                        style: const TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        "${authProvider.user?.email}",
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ],
+                                  Expanded(
+                                    child: Divider(
+                                      color: oren,
+                                      thickness: 1,
+                                      height: 30,
+                                      indent: 10,
+                                    ),
                                   ),
                                 ],
                               ),
+                              const SizedBox(height: 10),
+                              _buildProfileField('Kecamatan',
+                                  userProfile?['kecamatan_tempat_tinggal']),
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Kelurahan', userProfile?['nama_wilayah']),
+                              const SizedBox(height: 10),
+                              _buildProfileField('Alamat Lengkap',
+                                  userProfile?['alamat_lengkap']),
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Lingkungan', userProfile?['lingkungan']),
+                              const SizedBox(height: 40),
+                              const Row(
+                                children: [
+                                  Text(
+                                    'Data Sakramen',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: oren,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Divider(
+                                      color: oren,
+                                      thickness: 1,
+                                      height: 30,
+                                      indent: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Sudah Baptis', userProfile?['sudah_baptis']),
+                              if (userProfile?['sudah_baptis'] == 'sudah') ...[
+                                const SizedBox(height: 10),
+                                _buildProfileField('Tanggal Baptis',
+                                    userProfile?['tanggal_baptis']),
+                                const SizedBox(height: 10),
+                                _buildProfileField('Tempat Baptis',
+                                    userProfile?['tempat_baptis']),
+                              ],
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Sudah Komuni', userProfile?['sudah_komuni']),
+                              if (userProfile?['sudah_komuni'] == 'sudah') ...[
+                                const SizedBox(height: 10),
+                                _buildProfileField('Tanggal Komuni',
+                                    userProfile?['tanggal_komuni']),
+                                const SizedBox(height: 10),
+                                _buildProfileField('Tempat Komuni',
+                                    userProfile?['tempat_komuni']),
+                              ],
+                              const SizedBox(height: 10),
+                              _buildProfileField(
+                                  'Sudah Krisma', userProfile?['sudah_krisma']),
+                              if (userProfile?['sudah_krisma'] == 'sudah') ...[
+                                const SizedBox(height: 10),
+                                _buildProfileField('Tanggal Krisma',
+                                    userProfile?['tanggal_krisma']),
+                                const SizedBox(height: 10),
+                                _buildProfileField('Tempat Krisma',
+                                    userProfile?['tempat_krisma']),
+                              ],
+                              const SizedBox(height: 20),
+                              Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  margin: const EdgeInsets.only(top: 20),
+                                  child: const Text(
+                                    '© 2025 Paulus Connect. All rights reserved.',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+
+                              const SizedBox(
+                                  height: 20), // Add some space at the bottom
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      ],
+                    ),
+                    Center(
+                      child: Container(
+                        width: 300,
+                        height: 70,
+                        margin: const EdgeInsets.only(top: 245),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(25),
+                            bottomRight: Radius.circular(25),
+                            topRight: Radius.circular(25),
+                            topLeft: Radius.circular(25),
+                          ),
+                        ),
+                        child: Row(
                           children: [
-                            const SizedBox(height: 20),
-                            const Row(
-                              children: [
-                                Text(
-                                  'Data Diri',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: oren,
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const EditUserProfileScreen(),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Divider(
-                                    color: oren,
-                                    thickness: 1,
-                                    height: 30,
-                                    indent: 10,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Nama Lengkap', userProfile?['nama_lengkap']),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Nomor HP', userProfile?['no_hp']),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Tempat Lahir', userProfile?['tempat_lahir']),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Tanggal Lahir', userProfile?['tanggal_lahir']),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Jenis Kelamin', userProfile?['kelamin']),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Nama Ayah', userProfile?['nama_ayah']),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Nama Ibu', userProfile?['nama_ibu']),
-                            const SizedBox(height: 40),
-                            const Row(
-                              children: [
-                                Text(
-                                  'Alamat',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: oren,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Divider(
-                                    color: oren,
-                                    thickness: 1,
-                                    height: 30,
-                                    indent: 10,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            _buildProfileField('Kecamatan',
-                                userProfile?['kecamatan_tempat_tinggal']),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Kelurahan', userProfile?['nama_wilayah']),
-                            const SizedBox(height: 10),
-                            _buildProfileField('Alamat Lengkap',
-                                userProfile?['alamat_lengkap']),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Lingkungan', userProfile?['lingkungan']),
-                            const SizedBox(height: 40),
-                            const Row(
-                              children: [
-                                Text(
-                                  'Data Sakramen',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: oren,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Divider(
-                                    color: oren,
-                                    thickness: 1,
-                                    height: 30,
-                                    indent: 10,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Sudah Baptis', userProfile?['sudah_baptis']),
-                            if (userProfile?['sudah_baptis'] == 'sudah') ...[
-                              const SizedBox(height: 10),
-                              _buildProfileField('Tanggal Baptis',
-                                  userProfile?['tanggal_baptis']),
-                              const SizedBox(height: 10),
-                              _buildProfileField('Tempat Baptis',
-                                  userProfile?['tempat_baptis']),
-                            ],
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Sudah Komuni', userProfile?['sudah_komuni']),
-                            if (userProfile?['sudah_komuni'] == 'sudah') ...[
-                              const SizedBox(height: 10),
-                              _buildProfileField('Tanggal Komuni',
-                                  userProfile?['tanggal_komuni']),
-                              const SizedBox(height: 10),
-                              _buildProfileField('Tempat Komuni',
-                                  userProfile?['tempat_komuni']),
-                            ],
-                            const SizedBox(height: 10),
-                            _buildProfileField(
-                                'Sudah Krisma', userProfile?['sudah_krisma']),
-                            if (userProfile?['sudah_krisma'] == 'sudah') ...[
-                              const SizedBox(height: 10),
-                              _buildProfileField('Tanggal Krisma',
-                                  userProfile?['tanggal_krisma']),
-                              const SizedBox(height: 10),
-                              _buildProfileField('Tempat Krisma',
-                                  userProfile?['tempat_krisma']),
-                            ],
-                            const SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: () {
-                                // Navigate to edit profile screen
+                                );
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: oren, // Background color
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 50, vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              child: const Text(
-                                'Edit Profile',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
+                              child: Container(
+                                width: 145.1,
+                                decoration: const BoxDecoration(),
+                                child: const Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Edit Profile',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                      Icon(
+                                        Icons.edit,
+                                        size: 20,
+                                        color: oren,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: () {
+                            const Text(
+                              '|',
+                              style: TextStyle(
+                                fontSize: 50,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
                                 final authProvider = Provider.of<AuthProvider>(
                                     context,
                                     listen: false);
                                 authProvider.logout();
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LoginScreen()),
+                                    builder: (context) => const LoginScreen(),
+                                  ),
                                 );
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red, // Background color
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 50, vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              child: const Text(
-                                'Logout',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
+                              child: Container(
+                                width: 145.15,
+                                decoration: const BoxDecoration(),
+                                child: const Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Logout',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                      Icon(
+                                        Icons.logout_rounded,
+                                        size: 20,
+                                        color: oren,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                                height: 20), // Add some space at the bottom
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ]),
                 )
               : Center(
                   child: Padding(
