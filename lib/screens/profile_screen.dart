@@ -283,26 +283,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Center(
                       child: Container(
                         width: 300,
-                        height: 70,
+                        height: 60,
                         margin: const EdgeInsets.only(top: 245),
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(25),
-                            bottomRight: Radius.circular(25),
-                            topRight: Radius.circular(25),
-                            topLeft: Radius.circular(25),
+                            bottomLeft: Radius.circular(20),
+                            bottomRight: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                            topLeft: Radius.circular(20),
                           ),
                         ),
                         child: Row(
                           children: [
                             GestureDetector(
                               onTap: () {
-                                Navigator.of(context).pushReplacement(
+                                Navigator.push(
+                                  context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        const EditUserProfileScreen(),
-                                  ),
+                                      builder: (context) =>
+                                          const EditUserProfileScreen()),
                                 );
                               },
                               child: Container(

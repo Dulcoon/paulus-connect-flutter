@@ -3,12 +3,13 @@ import 'package:paulus_connect/alkitab/alkitab.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constans.dart';
-import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'profile_screen.dart';
 import '../services/api_service.dart';
 import 'pengumuman_detail_screen.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'bottom_navbar.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
+import '../main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -217,12 +218,20 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   bool _isLoading = true;
   List<dynamic> _pengumuman = [];
+  final List<String> imagePaths = [
+    'assets/images/carousel item1.jpg',
+    'assets/images/carousel item2.jpg',
+    'assets/images/carousel item3.jpg',
+    'assets/images/carousel item4.jpg',
+  ];
+  int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _checkCompletionStatus();
     _fetchPengumuman();
+    requestPermissions(context);
   }
 
   Future<void> _fetchPengumuman() async {
@@ -232,14 +241,14 @@ class _HomeContentState extends State<HomeContent> {
     if (token != null) {
       try {
         final data = await ApiService.fetchPengumuman(token);
-        if (!mounted) return; // Pastikan widget masih ada di tree
+        if (!mounted) return;
         setState(() {
           _pengumuman = data;
           _isLoading = false;
         });
       } catch (e) {
         print('Error fetching pengumuman: $e');
-        if (!mounted) return; // Pastikan widget masih ada di tree
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
@@ -255,7 +264,7 @@ class _HomeContentState extends State<HomeContent> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     await authProvider.fetchUserData();
 
-    if (!mounted) return; // Pastikan widget masih ada di tree
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
@@ -338,13 +347,79 @@ class _HomeContentState extends State<HomeContent> {
                           },
                         ),
                       if (isCompleted) const UnCompletionPrompt(),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 20),
+                      Divider(
+                        color: Colors.black.withOpacity(0.2),
+                        thickness: 1,
+                        height: 20,
+                      ),
+                      const SizedBox(height: 20),
                       Column(
                         children: [
+                          Column(
+                            children: [
+                              CarouselSlider(
+                                options: CarouselOptions(
+                                  height: 120,
+                                  aspectRatio: 21 / 9,
+                                  viewportFraction: 0.9,
+                                  enableInfiniteScroll: true,
+                                  autoPlay: true,
+                                  autoPlayInterval: const Duration(seconds: 3),
+                                  autoPlayAnimationDuration:
+                                      const Duration(milliseconds: 800),
+                                  enlargeCenterPage: true,
+                                  onPageChanged: (index, reason) {
+                                    setState(() {
+                                      _currentIndex = index;
+                                    });
+                                  },
+                                ),
+                                items: imagePaths.map((imagePath) {
+                                  return Builder(
+                                    builder: (BuildContext context) {
+                                      return ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
+                                        child: Image.asset(
+                                          imagePath,
+                                          fit: BoxFit.cover,
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }).toList(),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children:
+                                    imagePaths.asMap().entries.map((entry) {
+                                  return AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    width:
+                                        _currentIndex == entry.key ? 12.0 : 8.0,
+                                    height: 8.0,
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 4.0, vertical: 10.0),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: _currentIndex == entry.key
+                                          ? oren
+                                          : Colors.grey,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               _buildIconButton(
+                                width: 160,
+                                height: 90,
                                 imagePath:
                                     'assets/images/bookmark-dynamic-color.png',
                                 label: 'Doa-doa',
@@ -353,6 +428,8 @@ class _HomeContentState extends State<HomeContent> {
                                 },
                               ),
                               _buildIconButton(
+                                width: 160,
+                                height: 90,
                                 imagePath:
                                     'assets/images/pin-dynamic-color.png',
                                 label: 'Text Misa',
@@ -368,6 +445,8 @@ class _HomeContentState extends State<HomeContent> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               _buildIconButton(
+                                width: 160,
+                                height: 90,
                                 imagePath:
                                     'assets/images/calender-dynamic-color.png',
                                 label: 'Kalender Liturgi',
@@ -377,6 +456,8 @@ class _HomeContentState extends State<HomeContent> {
                                 },
                               ),
                               _buildIconButton(
+                                width: 160,
+                                height: 90,
                                 imagePath:
                                     'assets/images/bell-dynamic-gradient.png',
                                 label: 'Sakramen',
@@ -389,18 +470,66 @@ class _HomeContentState extends State<HomeContent> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 20),
+                      Divider(
+                        color: Colors.black.withOpacity(0.2),
+                        thickness: 1,
+                        height: 40,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildIconButton(
+                            width: 80,
+                            height: 80,
+                            icon: CupertinoIcons.calendar_today,
+                            label: 'Event',
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/sakramen-list');
+                            },
+                          ),
+                          _buildIconButton(
+                            width: 80,
+                            height: 80,
+                            icon: CupertinoIcons.envelope_open,
+                            label: 'Persembahan',
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/sakramen-list');
+                            },
+                          ),
+                          _buildIconButton(
+                            width: 80,
+                            height: 80,
+                            icon: CupertinoIcons.heart_circle_fill,
+                            label: 'Donasi',
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/sakramen-list');
+                            },
+                          ),
+                        ],
+                      ),
+                      Divider(
+                        color: Colors.black.withOpacity(0.2),
+                        thickness: 1,
+                        height: 40,
+                      ),
+                      const SizedBox(height: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Pengumuman Gereja',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          const Row(
+                            children: [
+                              SizedBox(width: 10),
+                              Text(
+                                'Pengumuman',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 10),
                           if (_isLoading)
                             const Center(
                                 child: CircularProgressIndicator(color: oren))
@@ -430,6 +559,16 @@ class _HomeContentState extends State<HomeContent> {
                             ),
                         ],
                       ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Versi 1.0.0',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -439,9 +578,12 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Widget _buildIconButton({
-    required String imagePath,
+    String? imagePath,
+    IconData? icon,
     required String label,
     double? imageWidth,
+    double? width, // Tambahkan parameter untuk width
+    double? height, // Tambahkan parameter untuk height
     required VoidCallback onPressed,
   }) {
     return Column(
@@ -450,16 +592,29 @@ class _HomeContentState extends State<HomeContent> {
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
             elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+            padding: EdgeInsets.zero, // Hilangkan padding default
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            fixedSize: width != null && height != null
+                ? Size(width, height) // Gunakan ukuran fix jika diberikan
+                : null, // Jika tidak diberikan, gunakan ukuran default
           ),
-          child: Image.asset(
-            imagePath,
-            width: imageWidth ?? 70,
-          ),
+          child: imagePath != null
+              ? Image.asset(
+                  imagePath,
+                  width: imageWidth ?? 70,
+                  height: height != null
+                      ? height - 20
+                      : null, // Sesuaikan tinggi gambar
+                  fit: BoxFit.contain,
+                )
+              : Icon(
+                  icon,
+                  size: imageWidth ?? 45,
+                  color: Colors.black,
+                ),
         ),
         const SizedBox(height: 4),
         Text(label),
@@ -480,7 +635,7 @@ class _HomeContentState extends State<HomeContent> {
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 15),
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(20),
           ),
         ),
         child: Row(

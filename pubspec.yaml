@@ -60,6 +60,8 @@ dependencies:
   fluttertoast: ^8.2.12
   xml: ^6.5.0
   curved_navigation_bar: ^1.0.6
+  carousel_slider: ^5.0.0
+  device_info_plus: ^11.3.0
 
 
 

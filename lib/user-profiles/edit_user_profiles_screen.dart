@@ -145,10 +145,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profil berhasil diperbarui')),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ProfileScreen()),
-        );
+        Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal memperbarui profil: $e')),
@@ -166,22 +163,20 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
     return Scaffold(
       backgroundColor: bgCollor,
       appBar: AppBar(
-        backgroundColor: oren,
         title: const Text(
-          'Edit Profile',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 19,
-            color: Colors.white,
-          ),
+          "Edit User Profile",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: bgCollor,
+        centerTitle: true,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.black,
+          ),
           onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => ProfileScreen()),
-            ); // Kembali ke halaman sebelumnya
+            Navigator.pop(context);
           },
         ),
       ),

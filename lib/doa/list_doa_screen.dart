@@ -67,7 +67,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
     _loadPersonalDoa();
     _loadReminders();
 
-    // Tambahkan pengingat default untuk doa Angelus
     _setDefaultAngelusReminders();
   }
 
@@ -81,16 +80,14 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
         final payload = response.payload;
-        print("Payload: $payload"); // Debugging line to check the payload
+        print("Payload: $payload");
         if (payload != null) {
-          // Cari doa berdasarkan judul (payload)
           final doa = allDoa.firstWhere(
             (doa) => doa['title'] == payload,
             orElse: () => {},
           );
 
           if (doa != null && doa['title'] != null && doa['content'] != null) {
-            // Navigasi ke halaman detail doa
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -243,20 +240,17 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
   Future<void> _setDefaultAngelusReminders() async {
     const angelusTitle = "Angelus";
 
-    // Waktu pengingat default
     final times = [
-      const TimeOfDay(hour: 6, minute: 0), // 06:00
-      const TimeOfDay(hour: 12, minute: 0), // 12:00
-      const TimeOfDay(hour: 18, minute: 0), // 18:00
+      const TimeOfDay(hour: 6, minute: 0),
+      const TimeOfDay(hour: 12, minute: 0),
+      const TimeOfDay(hour: 18, minute: 0),
     ];
 
-    // Periksa apakah pengingat untuk Angelus sudah ada
     for (final time in times) {
       final reminderKey =
           "reminder_${angelusTitle}_${time.hour}:${time.minute.toString().padLeft(2, '0')}";
       SharedPreferences prefs = await SharedPreferences.getInstance();
       if (!prefs.containsKey(reminderKey)) {
-        // Tambahkan pengingat jika belum ada
         await _addReminder(angelusTitle, time);
       }
     }
@@ -311,7 +305,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
       builder: (context) {
         return Wrap(
           children: [
-            // Opsi Hapus Doa
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
               title: const Text("Hapus Doa"),
@@ -320,7 +313,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                 _deleteDoa(title);
               },
             ),
-            // Opsi Hapus Pengingat
             ListTile(
               leading: const Icon(Icons.notifications_off, color: Colors.red),
               title: const Text("Hapus Pengingat"),
@@ -329,7 +321,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                 _deleteReminder(title);
               },
             ),
-            // Opsi Tambah Pengingat
             ListTile(
               leading: const Icon(Icons.notifications, color: Colors.blue),
               title: const Text("Tambahkan Pengingat"),
@@ -347,11 +338,9 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
   Future<void> _deleteDoa(String title) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      // Hapus dari doa pribadi
       personalDoa.removeWhere((doa) => doa.split('|')[0] == title);
       prefs.setStringList('personalDoa', personalDoa);
 
-      // Hapus dari favorit jika ada
       favoriteDoa.remove(title);
       prefs.setStringList('favoriteDoa', favoriteDoa);
     });
@@ -418,15 +407,12 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Ilustrasi atau Ikon
                         Icon(
                           Icons.bookmark_border,
                           size: 80,
                           color: Colors.grey[400],
                         ),
                         const SizedBox(height: 20),
-
-                        // Teks Informasi
                         const Text(
                           "Belum ada doa pribadi",
                           style: TextStyle(
@@ -436,8 +422,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-
-                        // Teks Deskripsi
                         const Text(
                           "Tambahkan doa pribadi Anda untuk memulai.",
                           textAlign: TextAlign.center,
@@ -447,8 +431,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                           ),
                         ),
                         const SizedBox(height: 30),
-
-                        // Tombol Tambah Doa
                         ElevatedButton.icon(
                           onPressed: () async {
                             final Map<String, String>? newDoa =
@@ -568,7 +550,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Row(
                   children: [
                     const Icon(Icons.add, color: oren, size: 24),
@@ -584,8 +565,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                // Input untuk Judul Doa
                 const Text(
                   "Judul Doa",
                   style: TextStyle(
@@ -613,8 +592,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Input untuk Isi Doa
                 const Text(
                   "Isi Doa",
                   style: TextStyle(
@@ -643,8 +620,6 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                   maxLines: 3,
                 ),
                 const SizedBox(height: 20),
-
-                // Tombol Aksi
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
