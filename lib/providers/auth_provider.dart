@@ -88,7 +88,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Fungsi untuk memverifikasi OTP
   Future<void> verifyOtp(String email, String otp) async {
     try {
       await ApiService.verifyOtp(email, otp);
@@ -97,7 +96,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Fungsi untuk mereset password
   Future<void> resetPassword(String email, String otp, String password,
       String passwordConfirmation) async {
     try {
@@ -114,12 +112,10 @@ class AuthProvider with ChangeNotifier {
 
     if (_token != null) {
       try {
-        // Ambil data user jika token valid
         final response = await ApiService.getUserData(_token!);
         _user = UserModel.fromJson(response);
         notifyListeners();
       } catch (e) {
-        // Jika token tidak valid, hapus token dari SharedPreferences
         await prefs.remove('token');
         _token = null;
       }

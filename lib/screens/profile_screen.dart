@@ -21,14 +21,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _checkCompletionStatus() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider
-        .fetchUserData(); // Fetch user data to check isCompleted status
+    await authProvider.fetchUserData();
 
     if (!mounted) return;
 
     if (authProvider.user?.isCompleted == 1) {
-      await authProvider
-          .fetchUserProfile(); // Fetch user profile data if isCompleted is true
+      await authProvider.fetchUserProfile();
     }
 
     setState(() {
@@ -90,8 +88,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   children: [
                                     const CircleAvatar(
                                       radius: 40,
-                                      backgroundImage:
-                                          AssetImage('assets/images/user.png'),
+                                      backgroundImage: AssetImage(
+                                          'assets/images/userProfile.png'),
                                     ),
                                     const SizedBox(width: 20),
                                     Column(
@@ -272,9 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                               const SizedBox(height: 20),
-
-                              const SizedBox(
-                                  height: 20), // Add some space at the bottom
+                              const SizedBox(height: 20),
                             ],
                           ),
                         ),
@@ -407,7 +403,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red, // Background color
+                            backgroundColor: Colors.red,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 5),
                             shape: RoundedRectangleBorder(

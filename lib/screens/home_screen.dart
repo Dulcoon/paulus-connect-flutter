@@ -482,19 +482,10 @@ class _HomeContentState extends State<HomeContent> {
                           _buildIconButton(
                             width: 80,
                             height: 80,
-                            icon: CupertinoIcons.calendar_today,
-                            label: 'Event',
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/sakramen-list');
-                            },
-                          ),
-                          _buildIconButton(
-                            width: 80,
-                            height: 80,
                             icon: CupertinoIcons.envelope_open,
                             label: 'Persembahan',
                             onPressed: () {
-                              Navigator.pushNamed(context, '/sakramen-list');
+                              Navigator.pushNamed(context, '/persembahan');
                             },
                           ),
                           _buildIconButton(
@@ -503,7 +494,7 @@ class _HomeContentState extends State<HomeContent> {
                             icon: CupertinoIcons.heart_circle_fill,
                             label: 'Donasi',
                             onPressed: () {
-                              Navigator.pushNamed(context, '/sakramen-list');
+                              Navigator.pushNamed(context, '/donasi');
                             },
                           ),
                         ],
@@ -582,8 +573,8 @@ class _HomeContentState extends State<HomeContent> {
     IconData? icon,
     required String label,
     double? imageWidth,
-    double? width, // Tambahkan parameter untuk width
-    double? height, // Tambahkan parameter untuk height
+    double? width,
+    double? height,
     required VoidCallback onPressed,
   }) {
     return Column(
@@ -592,22 +583,19 @@ class _HomeContentState extends State<HomeContent> {
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
             elevation: 0,
-            padding: EdgeInsets.zero, // Hilangkan padding default
+            padding: EdgeInsets.zero,
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            fixedSize: width != null && height != null
-                ? Size(width, height) // Gunakan ukuran fix jika diberikan
-                : null, // Jika tidak diberikan, gunakan ukuran default
+            fixedSize:
+                width != null && height != null ? Size(width, height) : null,
           ),
           child: imagePath != null
               ? Image.asset(
                   imagePath,
                   width: imageWidth ?? 70,
-                  height: height != null
-                      ? height - 20
-                      : null, // Sesuaikan tinggi gambar
+                  height: height != null ? height - 20 : null,
                   fit: BoxFit.contain,
                 )
               : Icon(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
-import '../widgets/custom_date_field.dart'; // Import CustomDateField
+import '../widgets/custom_date_field.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import '../utils/constans.dart';
@@ -26,10 +26,10 @@ class _SakramenRegistrationScreenState
 
   String? _selectedJenisKelamin;
 
-  // Controllers untuk form field
   final TextEditingController _namaLengkapController = TextEditingController();
   final TextEditingController _tempatLahirController = TextEditingController();
   final TextEditingController _tanggalLahirController = TextEditingController();
+  final TextEditingController _noHpController = TextEditingController();
   final TextEditingController _namaAyahController = TextEditingController();
   final TextEditingController _namaIbuController = TextEditingController();
   final TextEditingController _kecamatanController = TextEditingController();
@@ -38,7 +38,6 @@ class _SakramenRegistrationScreenState
       TextEditingController();
   final TextEditingController _lingkunganController = TextEditingController();
 
-  // File uploader
   File? _berkasKK;
   File? _berkasAktaKelahiran;
   File? _berkasSuratBaptis;
@@ -62,7 +61,6 @@ class _SakramenRegistrationScreenState
           _isLoading = false;
           _selectedJenisKelamin = data['kelamin'];
 
-          // Isi nilai default ke dalam controller
           _namaLengkapController.text = data['nama'] ?? '';
           _tempatLahirController.text = data['tempat_lahir'] ?? '';
           _tanggalLahirController.text = data['tanggal_lahir'] ?? '';
@@ -72,6 +70,7 @@ class _SakramenRegistrationScreenState
           _kelurahanController.text = data['kelurahan'] ?? '';
           _alamatLengkapController.text = data['alamat'] ?? '';
           _lingkunganController.text = data['lingkungan'] ?? '';
+          _noHpController.text = data['no_hp'] ?? '';
         });
       } catch (e) {
         setState(() {
@@ -131,6 +130,7 @@ class _SakramenRegistrationScreenState
             'tempat_lahir': _tempatLahirController.text,
             'tanggal_lahir': _tanggalLahirController.text,
             'jenis_kelamin': _selectedJenisKelamin,
+            'no_hp': _noHpController.text,
             'nama_ayah': _namaAyahController.text,
             'nama_ibu': _namaIbuController.text,
             'kecamatan': _kecamatanController.text,
@@ -151,8 +151,11 @@ class _SakramenRegistrationScreenState
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Pendaftaran berhasil!')),
           );
-          Navigator.pushNamed(
-              context, '/sakramen-list'); // Kembali ke halaman sebelumnya
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/sakramen-list',
+            (route) => false,
+          );
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Gagal mendaftarkan: $e')),
@@ -234,6 +237,7 @@ class _SakramenRegistrationScreenState
                         },
                       ),
                     ),
+                    _buildTextField(_noHpController, 'No HP'),
                     _buildTextField(_namaAyahController, 'Nama Ayah'),
                     _buildTextField(_namaIbuController, 'Nama Ibu'),
                     _buildTextField(_kecamatanController, 'Kecamatan'),
@@ -241,86 +245,53 @@ class _SakramenRegistrationScreenState
                     _buildTextField(_alamatLengkapController, 'Alamat Lengkap'),
                     _buildTextField(_lingkunganController, 'Lingkungan'),
                     const SizedBox(height: 20),
-
-                    // File Uploaders
-                    if (widget.event['jenis_sakramen'] == 'Baptis') ...[
-                      ElevatedButton(
-                        onPressed: () => _pickFile('kk'),
-                        child: Text(_berkasKK == null
-                            ? 'Upload Berkas KK'
-                            : 'Berkas KK Terpilih'),
-                      ),
+                    _buildFileUploader(
+                      label: 'Upload Berkas KK',
+                      file: _berkasKK,
+                      onUpload: () => _pickFile('kk'),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildFileUploader(
+                      label: 'Upload Akta Kelahiran',
+                      file: _berkasAktaKelahiran,
+                      onUpload: () => _pickFile('akta'),
+                    ),
+                    if (widget.event['jenis_sakramen'] == 'Komuni' ||
+                        widget.event['jenis_sakramen'] == 'Krisma') ...[
                       const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () => _pickFile('akta'),
-                        child: Text(_berkasAktaKelahiran == null
-                            ? 'Upload Akta Kelahiran'
-                            : 'Akta Kelahiran Terpilih'),
+                      _buildFileUploader(
+                        label: 'Upload Surat Baptis',
+                        file: _berkasSuratBaptis,
+                        onUpload: () => _pickFile('baptis'),
                       ),
-                    ] else if (widget.event['jenis_sakramen'] == 'Komuni') ...[
-                      ElevatedButton(
-                        onPressed: () => _pickFile('kk'),
-                        child: Text(_berkasKK == null
-                            ? 'Upload Berkas KK'
-                            : 'Berkas KK Terpilih'),
-                      ),
+                    ],
+                    if (widget.event['jenis_sakramen'] == 'Krisma') ...[
                       const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () => _pickFile('akta'),
-                        child: Text(_berkasAktaKelahiran == null
-                            ? 'Upload Akta Kelahiran'
-                            : 'Akta Kelahiran Terpilih'),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () => _pickFile('baptis'),
-                        child: Text(_berkasSuratBaptis == null
-                            ? 'Upload Surat Baptis'
-                            : 'Surat Baptis Terpilih'),
-                      ),
-                    ] else if (widget.event['jenis_sakramen'] == 'Krisma') ...[
-                      ElevatedButton(
-                        onPressed: () => _pickFile('kk'),
-                        child: Text(_berkasKK == null
-                            ? 'Upload Berkas KK'
-                            : 'Berkas KK Terpilih'),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () => _pickFile('akta'),
-                        child: Text(_berkasAktaKelahiran == null
-                            ? 'Upload Akta Kelahiran'
-                            : 'Akta Kelahiran Terpilih'),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () => _pickFile('baptis'),
-                        child: Text(_berkasSuratBaptis == null
-                            ? 'Upload Surat Baptis'
-                            : 'Surat Baptis Terpilih'),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () => _pickFile('komuni'),
-                        child: Text(_berkasSuratKomuni == null
-                            ? 'Upload Surat Komuni'
-                            : 'Surat Komuni Terpilih'),
+                      _buildFileUploader(
+                        label: 'Upload Surat Komuni',
+                        file: _berkasSuratKomuni,
+                        onUpload: () => _pickFile('komuni'),
                       ),
                     ],
                     const SizedBox(height: 20),
-
                     ElevatedButton(
                       onPressed: _submitRegistration,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: oren,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        minimumSize: const Size.fromHeight(50),
+                        elevation: 3,
                       ),
                       child: const Text(
                         'Daftar',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -357,6 +328,59 @@ class _SakramenRegistrationScreenState
           }
           return null;
         },
+      ),
+    );
+  }
+
+  Widget _buildFileUploader({
+    required String label,
+    required File? file,
+    required VoidCallback onUpload,
+  }) {
+    return GestureDetector(
+      onTap: onUpload,
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: file == null ? orenKalem : Colors.green,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(10),
+          color: file == null
+              ? orenKalem.withOpacity(0.1)
+              : Colors.green.withOpacity(0.1),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              file == null ? Icons.upload_file : Icons.check_circle,
+              color: file == null ? orenKalem : Colors.green,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                file == null ? label : 'File berhasil diunggah',
+                style: TextStyle(
+                  color: file == null ? orenKalem : Colors.green,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            if (file != null)
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  setState(() {
+                    if (label.contains('KK')) _berkasKK = null;
+                    if (label.contains('Akta')) _berkasAktaKelahiran = null;
+                    if (label.contains('Baptis')) _berkasSuratBaptis = null;
+                    if (label.contains('Komuni')) _berkasSuratKomuni = null;
+                  });
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

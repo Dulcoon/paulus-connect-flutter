@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constans.dart';
 import '../services/api_service.dart';
+import '../screens/home_screen.dart';
 
 class UserDataScreen extends StatefulWidget {
   const UserDataScreen({super.key});
@@ -29,7 +30,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
   final _tanggalKrismaController = TextEditingController();
 
   String? _selectedKelurahanId;
-  String? _selectedJenisKelamin; // Ensure this variable is declared
+  String? _selectedJenisKelamin;
   String? _selectedBaptis;
   String? _selectedKomuni;
   String? _selectedKrisma;
@@ -66,7 +67,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
         return;
       }
 
-      final wilayah = await ApiService.getWilayah(); // Menggunakan token
+      final wilayah = await ApiService.getWilayah();
       setState(() {
         _wilayahList = wilayah;
       });
@@ -113,17 +114,17 @@ class _UserDataScreenState extends State<UserDataScreen> {
         "kecamatan_tempat_tinggal": _kecamatanController.text,
         "kelurahan_id": _selectedKelurahanId,
         "alamat_lengkap": _alamatLengkapController.text,
-        "baptis": _selectedBaptis,
+        "sudah_baptis": _selectedBaptis,
         "tanggal_baptis":
             _selectedBaptis == 'sudah' ? _tanggalBaptisController.text : null,
         "tempat_baptis":
             _selectedBaptis == 'sudah' ? _tempatBaptisController.text : null,
-        "komuni": _selectedKomuni,
+        "sudah_komuni": _selectedKomuni,
         "tanggal_komuni":
             _selectedKomuni == 'sudah' ? _tanggalKomuniController.text : null,
         "tempat_komuni":
             _selectedKomuni == 'sudah' ? _tempatKomuniController.text : null,
-        "krisma": _selectedKrisma,
+        "sudah_krisma": _selectedKrisma,
         "tanggal_krisma":
             _selectedKrisma == 'sudah' ? _tanggalKrismaController.text : null,
         "tempat_krisma":
@@ -131,12 +132,17 @@ class _UserDataScreenState extends State<UserDataScreen> {
       };
 
       try {
-        await ApiService.saveUserData(token, userId, data); // Menggunakan token
+        await ApiService.saveUserData(token, userId, data);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Data berhasil disimpan')),
         );
-        _clearFormFields(); // Clear the form fields
-        await _showSuccessDialog(); // Show success dialog
+        _clearFormFields();
+        await _showSuccessDialog();
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal menyimpan data: $e')),
@@ -172,13 +178,13 @@ class _UserDataScreenState extends State<UserDataScreen> {
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(false); // Return false
+                    Navigator.of(context).pop(false);
                   },
                   child: Text('Tidak'),
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(true); // Return true
+                    Navigator.of(context).pop(true);
                   },
                   child: Text('Ya'),
                 ),
@@ -186,7 +192,7 @@ class _UserDataScreenState extends State<UserDataScreen> {
             );
           },
         ) ??
-        false; // Return false if dialog is dismissed
+        false;
   }
 
   Future<void> _showSuccessDialog() async {
@@ -354,9 +360,9 @@ class _UserDataScreenState extends State<UserDataScreen> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text("Masuk",
+                              : const Text("Submit",
                                   style: TextStyle(
-                                      fontSize: 15, color: Colors.white)),
+                                      fontSize: 18, color: Colors.white)),
                         ),
                       ),
                       const SizedBox(height: 40)

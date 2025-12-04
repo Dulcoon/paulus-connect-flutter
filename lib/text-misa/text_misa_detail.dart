@@ -24,7 +24,7 @@ class _TextMisaDetailState extends State<TextMisaDetail> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Menghilangkan tombol back default
+        automaticallyImplyLeading: false,
         backgroundColor: oren,
         foregroundColor: Colors.white,
         title: const Row(
@@ -123,7 +123,7 @@ class _TextMisaDetailState extends State<TextMisaDetail> {
                   },
                   onPageChanged: (int? page, int? total) {
                     setState(() {
-                      _currentPage = page! + 1; // Halaman dimulai dari 1
+                      _currentPage = page! + 1;
                     });
                   },
                   onError: (error) {

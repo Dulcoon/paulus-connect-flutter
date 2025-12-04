@@ -14,24 +14,22 @@ class SakramenEventList extends StatefulWidget {
 class _SakramenEventListState extends State<SakramenEventList> {
   late Future<List<dynamic>> _events;
   bool _isLoading = true;
-  bool _isProfileCompleted = true; // Tambahkan flag untuk validasi profil
+  bool _isProfileCompleted = true;
 
   @override
   void initState() {
     super.initState();
-    _checkCompletionStatus(); // Tambahkan validasi isCompleted
+    _checkCompletionStatus();
   }
 
   Future<void> _checkCompletionStatus() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider
-        .fetchUserData(); // Fetch user data untuk memeriksa isCompleted
+    await authProvider.fetchUserData();
 
     if (!mounted) return;
 
     if (authProvider.user?.isCompleted == 1) {
-      await authProvider
-          .fetchUserProfile(); // Fetch user profile jika isCompleted true
+      await authProvider.fetchUserProfile();
       final token = authProvider.token;
 
       if (token != null) {
@@ -40,7 +38,6 @@ class _SakramenEventListState extends State<SakramenEventList> {
         _events = Future.error('Token tidak valid. Silakan login ulang.');
       }
     } else {
-      // Set flag isProfileCompleted ke false jika profil belum lengkap
       _isProfileCompleted = false;
     }
 
@@ -67,7 +64,11 @@ class _SakramenEventListState extends State<SakramenEventList> {
             color: Colors.black,
           ),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/home',
+              (route) => false,
+            );
           },
         ),
       ),
@@ -137,7 +138,6 @@ class _SakramenEventListState extends State<SakramenEventList> {
                                       color: Colors.white),
                                 ),
                                 onTap: () {
-                                  // Navigasi ke halaman detail sakramen
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

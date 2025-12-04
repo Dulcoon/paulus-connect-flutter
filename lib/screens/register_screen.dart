@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constans.dart';
-import '../widgets/custom_text_field.dart'; // Import CustomTextField
+import '../widgets/custom_text_field.dart';
 import 'home_screen.dart';
 import 'package:flutter/gestures.dart';
 
@@ -20,6 +20,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   void _register() async {
     setState(() => _isLoading = true);
@@ -51,11 +53,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Pastikan ini diatur ke true
+      resizeToAvoidBottomInset: true,
       backgroundColor: oren,
       body: SafeArea(
         child: SingleChildScrollView(
-          // Bungkus konten dengan SingleChildScrollView
           child: Container(
             child: Column(
               children: [
@@ -83,7 +84,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const Text(
                         "Silahkan daftarkan diri anda!",
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 13,
                           fontWeight: FontWeight.normal,
                         ),
                       ),
@@ -102,17 +103,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       CustomTextField(
                         controller: _passwordController,
-                        label: "Password",
+                        label: "Kata sandi",
                         primaryColor: oren,
                         borderColor: oren,
-                        obscureText: true,
+                        obscureText: !_isPasswordVisible,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                        ),
                       ),
                       CustomTextField(
                         controller: _confirmPasswordController,
                         label: "Konfirmasi kata sandi",
                         primaryColor: oren,
                         borderColor: oren,
-                        obscureText: true,
+                        obscureText: !_isConfirmPasswordVisible,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isConfirmPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isConfirmPasswordVisible =
+                                  !_isConfirmPasswordVisible;
+                            });
+                          },
+                        ),
                       ),
                       const SizedBox(height: 20),
                       Container(

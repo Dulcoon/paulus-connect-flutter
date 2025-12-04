@@ -7,6 +7,7 @@ import 'package:path/path.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 
 class ApiService {
   static Future<Map<String, dynamic>> loginWithGoogle() async {
@@ -166,6 +167,7 @@ class ApiService {
       Uri.parse("$BASE_URL/user-profile"),
       headers: {
         "Authorization": "Bearer $token",
+        'Accept': 'application/json',
         "Content-Type": "application/json"
       },
       body: jsonEncode(data),
@@ -173,6 +175,7 @@ class ApiService {
     print("Data yang dikirim: $data");
 
     if (response.statusCode != 201) {
+      print("Response: ${response.body}");
       throw Exception("Gagal menyimpan data user");
     }
   }
@@ -433,8 +436,6 @@ class ApiService {
 
   static Future<Map<String, dynamic>?> fetchLiturgiByDate(String date) async {
     final String apiUrl = "$BASE_URL/kalender-liturgi/by-date?date=$date";
-    print('date: $date');
-    print('apiUrl: $apiUrl');
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -498,15 +499,219 @@ class ApiService {
     }
   }
 
-  static Future<List<int>> downloadFile(String url) async {
-    print("Mengunduh file dari URL: $url");
+  static Future<List<int>> downloadFile(String fileName) async {
+    final url =
+        '$BASE_URL_NO_API/misa-pdf/$fileName'; // ← gunakan endpoint baru
+    print('Mengunduh file dari: $url');
     final response = await http.get(Uri.parse(url));
+
     if (response.statusCode == 200) {
-      print("File berhasil diunduh.");
       return response.bodyBytes;
     } else {
-      print("Gagal mengunduh file. Status code: ${response.statusCode}");
       throw Exception('Gagal mengunduh file: ${response.statusCode}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> createDonation({
+    required int amount,
+    required String note,
+    required String token,
+  }) async {
+    print('=== CREATE DONATION DEBUG ===');
+    print('URL: $BASE_URL/donations');
+    print('Amount: $amount');
+    print('Note: $note');
+    print('Token: ${token.substring(0, 20)}...');
+
+    try {
+      final requestBody = {
+        'amount': amount,
+        'note': note,
+      };
+
+      print('Request Body: $requestBody');
+
+      final response = await http.post(
+        Uri.parse('$BASE_URL/donations'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode(requestBody),
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body);
+        print('SUCCESS - Parsed Data: $data');
+        return data;
+      } else {
+        print('ERROR - HTTP ${response.statusCode}: ${response.body}');
+        final errorData = json.decode(response.body);
+        throw Exception(
+            'HTTP ${response.statusCode}: ${errorData['message'] ?? response.body}');
+      }
+    } catch (e) {
+      print('EXCEPTION in createDonation: $e');
+      print('Exception Type: ${e.runtimeType}');
+      throw Exception('Failed to create donation: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> checkPaymentStatus({
+    required int donationId,
+    required String token,
+  }) async {
+    print('=== CHECK PAYMENT STATUS DEBUG ===');
+    print('URL: $BASE_URL/donations/$donationId/status');
+    print('Donation ID: $donationId');
+    print('Token: ${token.substring(0, 20)}...');
+
+    try {
+      final response = await http.get(
+        Uri.parse("$BASE_URL/donations/$donationId/status"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('SUCCESS - Parsed Data: $data');
+        return data;
+      } else {
+        print('ERROR - HTTP ${response.statusCode}: ${response.body}');
+        final errorData = json.decode(response.body);
+        throw Exception(
+            'HTTP ${response.statusCode}: ${errorData['message'] ?? response.body}');
+      }
+    } catch (e) {
+      print('EXCEPTION in checkPaymentStatus: $e');
+      print('Exception Type: ${e.runtimeType}');
+      throw Exception('Failed to check payment status: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> getDonationHistory({
+    required String token,
+  }) async {
+    print('=== GET DONATION HISTORY DEBUG ===');
+    print('URL: $BASE_URL/donations/history');
+    print('Token: ${token.substring(0, 20)}...');
+
+    try {
+      final response = await http.get(
+        Uri.parse('$BASE_URL/donations/history'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('SUCCESS - Parsed Data: $data');
+        return data;
+      } else {
+        print('ERROR - HTTP ${response.statusCode}: ${response.body}');
+        final errorData = json.decode(response.body);
+        throw Exception(
+            'HTTP ${response.statusCode}: ${errorData['message'] ?? response.body}');
+      }
+    } catch (e) {
+      print('EXCEPTION in getDonationHistory: $e');
+      print('Exception Type: ${e.runtimeType}');
+      throw Exception('Failed to get donation history: $e');
+    }
+  }
+
+  // Tambahkan method untuk persembahan
+
+  static Future<Map<String, dynamic>> getPersembahanHistory({
+    required String token,
+  }) async {
+    print('=== GET PERSEMBAHAN HISTORY DEBUG ===');
+    print('URL: $BASE_URL/persembahan');
+    print('Token: ${token.substring(0, 20)}...');
+
+    try {
+      final response = await http.get(
+        Uri.parse('$BASE_URL/persembahan'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('SUCCESS - Parsed Data: $data');
+        return data;
+      } else {
+        print('ERROR - HTTP ${response.statusCode}: ${response.body}');
+        final errorData = json.decode(response.body);
+        throw Exception(
+            'HTTP ${response.statusCode}: ${errorData['message'] ?? response.body}');
+      }
+    } catch (e) {
+      print('EXCEPTION in getPersembahanHistory: $e');
+      print('Exception Type: ${e.runtimeType}');
+      throw Exception('Failed to get persembahan history: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> getPersembahanDetail({
+    required int id,
+    required String token,
+  }) async {
+    print('=== GET PERSEMBAHAN DETAIL DEBUG ===');
+    print('URL: $BASE_URL/persembahan/$id');
+    print('ID: $id');
+    print('Token: ${token.substring(0, 20)}...');
+
+    try {
+      final response = await http.get(
+        Uri.parse('$BASE_URL/persembahan/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('SUCCESS - Parsed Data: $data');
+        return data;
+      } else {
+        print('ERROR - HTTP ${response.statusCode}: ${response.body}');
+        final errorData = json.decode(response.body);
+        throw Exception(
+            'HTTP ${response.statusCode}: ${errorData['message'] ?? response.body}');
+      }
+    } catch (e) {
+      print('EXCEPTION in getPersembahanDetail: $e');
+      print('Exception Type: ${e.runtimeType}');
+      throw Exception('Failed to get persembahan detail: $e');
     }
   }
 }

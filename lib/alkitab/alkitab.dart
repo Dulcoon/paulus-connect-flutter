@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../utils/constans.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -27,7 +26,6 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
       if (response.statusCode == 200) {
         final document = xml.XmlDocument.parse(response.body);
 
-        // Ambil judul dari elemen <title> pada ayat pertama
         final firstVerseTitle = document
                 .findAllElements('verse')
                 .first
@@ -41,7 +39,6 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
                 .text
             : 'Judul tidak tersedia';
 
-        // Ambil daftar ayat
         final verses = document.findAllElements('verse').map((verseElement) {
           return {
             'number': verseElement.findElements('number').first.text,
@@ -54,7 +51,7 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
 
         setState(() {
           _bibleData = {
-            'title': firstVerseTitle, // Gunakan judul dari ayat pertama
+            'title': firstVerseTitle,
             'verses': verses,
           };
         });
@@ -75,7 +72,7 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchBibleData('Yohanes+1:1-10'); // Default passage
+    _fetchBibleData('Yohanes+1:1-10');
   }
 
   Widget _buildVerseList() {
@@ -96,7 +93,6 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Judul di tengah atas
           Center(
             child: Text(
               title,
@@ -109,13 +105,10 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
             ),
           ),
           const SizedBox(height: 16),
-
-          // Daftar ayat
           ...verses.map((verse) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nomor ayat di dalam tanda kurung
                 Text(
                   '[${verse['number']}]',
                   style: const TextStyle(
@@ -125,17 +118,15 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-
-                // Isi ayat
                 Text(
                   verse['text'] ?? '',
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black87,
-                    height: 1.5, // Menambahkan jarak antar baris
+                    height: 1.5,
                   ),
                 ),
-                const SizedBox(height: 16), // Jarak antar ayat
+                const SizedBox(height: 16),
               ],
             );
           }).toList(),
@@ -170,10 +161,8 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Form pencarian
                   Row(
                     children: [
-                      // Input pencarian
                       Expanded(
                         child: TextField(
                           onChanged: (value) {
@@ -197,8 +186,6 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-
-                      // Tombol pencarian
                       ElevatedButton(
                         onPressed: () {
                           if (_searchQuery.isNotEmpty) {
@@ -230,13 +217,10 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // Input yang dimasukkan pengguna dan ikon favorit
                   if (_searchQuery.isNotEmpty)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Input pengguna
                         Text(
                           _searchQuery,
                           style: const TextStyle(
@@ -245,28 +229,9 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
                             color: Colors.black87,
                           ),
                         ),
-
-                        // Ikon bintang untuk favorit
-                        IconButton(
-                          icon: const Icon(
-                            Icons.star_border,
-                            color: oren,
-                          ),
-                          onPressed: () {
-                            // Tambahkan logika untuk menambahkan ke favorit
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    '$_searchQuery ditambahkan ke favorit'),
-                              ),
-                            );
-                          },
-                        ),
                       ],
                     ),
                   const SizedBox(height: 16),
-
-                  // Konten Alkitab
                   Expanded(child: _buildVerseList()),
                 ],
               ),

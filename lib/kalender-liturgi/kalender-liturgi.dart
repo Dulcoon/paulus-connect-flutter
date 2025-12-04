@@ -16,15 +16,13 @@ class _KalenderLiturgiScreenState extends State<KalenderLiturgiScreen> {
   Map<String, dynamic>? _liturgiData;
   bool _isLoading = false;
 
-  final ScrollController _scrollController =
-      ScrollController(); // Tambahkan ScrollController
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _fetchLiturgiData(_selectedDate);
 
-    // Pindahkan scroll ke posisi tanggal yang dipilih
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedDate();
     });
@@ -35,12 +33,9 @@ class _KalenderLiturgiScreenState extends State<KalenderLiturgiScreen> {
         DateTime.now().subtract(const Duration(days: 15));
     final DateTime selectedDate = DateTime.parse(_selectedDate);
 
-    // Hitung index dari tanggal yang dipilih
     final int selectedIndex = selectedDate.difference(startDate).inDays;
 
-    // Pindahkan scroll ke posisi index yang sesuai
-    _scrollController
-        .jumpTo(selectedIndex * 64.0); // 64.0 adalah lebar item (60 + margin)
+    _scrollController.jumpTo(selectedIndex * 64.0);
   }
 
   Future<void> _fetchLiturgiData(String date) async {
@@ -119,7 +114,7 @@ class _KalenderLiturgiScreenState extends State<KalenderLiturgiScreen> {
           SizedBox(
             height: 80,
             child: ListView.builder(
-              controller: _scrollController, // Tambahkan ScrollController
+              controller: _scrollController,
               scrollDirection: Axis.horizontal,
               itemCount: _datesInRange.length,
               itemBuilder: (context, index) {
@@ -196,15 +191,12 @@ class _KalenderLiturgiScreenState extends State<KalenderLiturgiScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ilustrasi atau Ikon
             Icon(
               Icons.event_note,
               size: 80,
               color: Colors.grey[400],
             ),
             const SizedBox(height: 20),
-
-            // Teks Informasi
             const Text(
               "Tidak Ada Data Liturgi",
               style: TextStyle(
@@ -214,8 +206,6 @@ class _KalenderLiturgiScreenState extends State<KalenderLiturgiScreen> {
               ),
             ),
             const SizedBox(height: 10),
-
-            // Teks Deskripsi
             const Text(
               "Silakan pilih tanggal lain untuk melihat data liturgi.",
               textAlign: TextAlign.center,
@@ -232,7 +222,6 @@ class _KalenderLiturgiScreenState extends State<KalenderLiturgiScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Judul Liturgi
         Text(
           _liturgiData!['title'] ?? "Judul tidak tersedia",
           style: const TextStyle(
@@ -242,8 +231,6 @@ class _KalenderLiturgiScreenState extends State<KalenderLiturgiScreen> {
           ),
         ),
         const SizedBox(height: 16),
-
-        // Kartu Informasi Liturgi
         Card(
           elevation: 2,
           shape: RoundedRectangleBorder(

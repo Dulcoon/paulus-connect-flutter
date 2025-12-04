@@ -31,7 +31,7 @@ class CustomDateField extends StatelessWidget {
         child: IgnorePointer(
           child: Theme(
             data: ThemeData(
-              primaryColor: Colors.orange, // Replace with your `oren` color
+              primaryColor: Colors.orange,
               colorScheme: const ColorScheme.light(primary: Colors.orange),
             ),
             child: TextFormField(
@@ -45,8 +45,7 @@ class CustomDateField extends StatelessWidget {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
-                  borderSide: const BorderSide(
-                      color: Colors.grey), // Replace with `bgCollor`
+                  borderSide: const BorderSide(color: Colors.grey),
                 ),
                 labelText: label,
                 border: OutlineInputBorder(

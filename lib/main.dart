@@ -25,6 +25,10 @@ import 'alkitab/alkitab.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'splash_screen.dart';
+import 'screens/jadwal_misa_screen.dart';
+import 'screens/donation_screen.dart';
+import 'screens/persembahan_screen.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -35,10 +39,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  setupNotificationChannel();
+  setupFCM();
 
   runApp(
     MultiProvider(
@@ -49,21 +55,22 @@ Future<void> main() async {
         navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(fontFamily: 'Poppins'),
-        initialRoute: '/login',
+        home: const SplashScreen(),
         routes: {
           '/register': (context) => const RegisterScreen(),
           '/login': (context) => const LoginScreen(),
-          '/home': (context) => HomeScreen(),
+          '/home': (context) => const HomeScreen(),
           '/artikel': (context) => const ArtikelScreen(),
           '/userData': (context) => const UserDataScreen(),
           '/editUserData': (context) => const EditUserProfileScreen(),
           '/doa': (context) => const ListDoaScreen(),
+          '/persembahan': (context) => const PersembahanScreen(),
           '/sakramen-list': (context) => SakramenEventList(),
           '/forgot-password': (context) => ForgotPasswordEmailScreen(),
           '/kalender-liturgi': (context) => const KalenderLiturgiScreen(),
           '/alkitab': (context) => const AlkitabScreen(),
           '/text-misa': (context) => const TextMisaList(),
-          '/edit-user-profiles': (context) => const EditUserProfileScreen(),
+          '/donasi': (context) => const DonationScreen(),
           '/verify-otp': (context) => VerifyOtpScreen(
                 email: ModalRoute.of(context)!.settings.arguments as String,
               ),
@@ -72,47 +79,43 @@ Future<void> main() async {
                     as Map)['email'],
                 otp: (ModalRoute.of(context)!.settings.arguments as Map)['otp'],
               ),
+          '/jadwal-misa': (context) => const JadwalMisaScreen(),
         },
       ),
     ),
   );
 }
 
+void setupNotificationChannel() {
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'default_channel', // ID channel
+    'Default', // Nama channel
+    description: 'Default notification channel', // Deskripsi
+    importance: Importance.max,
+  );
+
+  flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+}
+
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
-  RemoteNotification? notification = message.notification;
-  if (notification != null) {
+  // Proses hanya jika `notification` ada
+  if (message.notification != null) {
     flutterLocalNotificationsPlugin.show(
-      notification.hashCode,
-      notification.title,
-      notification.body,
+      message.hashCode,
+      message.notification!.title,
+      message.notification!.body,
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'default_channel',
           'Default',
           importance: Importance.max,
           priority: Priority.high,
-        ),
-      ),
-    );
-  } else if (message.data.isNotEmpty) {
-    flutterLocalNotificationsPlugin.show(
-      message.hashCode,
-      message.data['title'] ?? 'Judul Default',
-      message.data['body'] ?? 'Isi Default',
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          'default_channel',
-          'Default',
-          importance: Importance.max,
-          priority: Priority.high,
-          styleInformation: BigTextStyleInformation(
-            message.data['body'] ?? 'Isi Default',
-            contentTitle: message.data['title'] ?? 'Judul Default',
-            htmlFormatContent: true,
-            htmlFormatContentTitle: true,
-          ),
+          icon: '@mipmap/ic_launcher',
         ),
       ),
     );
@@ -125,55 +128,29 @@ void setupFCM() async {
   String? token = await messaging.getToken();
   print("FCM Token: $token");
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    RemoteNotification? notification = message.notification;
-    AndroidNotification? android = message.notification?.android;
-
-    if (notification != null && android != null) {
-      flutterLocalNotificationsPlugin.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            'default_channel',
-            'Default',
-            importance: Importance.max,
-            priority: Priority.high,
-            styleInformation: BigTextStyleInformation(
-              message.data['body'] ?? 'Isi Default',
-              contentTitle: message.data['title'] ?? 'Judul Default',
-              htmlFormatContent: true,
-              htmlFormatContentTitle: true,
-            ),
-          ),
-        ),
-      );
-    } else if (message.data.isNotEmpty) {
+    // Proses hanya jika `notification` ada
+    if (message.notification != null) {
       flutterLocalNotificationsPlugin.show(
         message.hashCode,
-        message.data['title'] ?? 'Judul Default',
-        message.data['body'] ?? 'Isi Default',
-        NotificationDetails(
+        message.notification!.title,
+        message.notification!.body,
+        const NotificationDetails(
           android: AndroidNotificationDetails(
             'default_channel',
             'Default',
             importance: Importance.max,
             priority: Priority.high,
-            styleInformation: BigTextStyleInformation(
-              message.data['body'] ?? 'Isi Default',
-              contentTitle: message.data['title'] ?? 'Judul Default',
-              htmlFormatContent: true,
-              htmlFormatContentTitle: true,
-            ),
+            icon: '@mipmap/ic_launcher',
           ),
         ),
       );
     }
   });
 
+// saat dibuka
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     if (message.data['action'] == 'view_sakramen_event') {
       final sakramenEventId = message.data['sakramen_event_id'];
@@ -191,9 +168,20 @@ void setupFCM() async {
   });
 }
 
+// handle permissions
 Future<void> requestPermissions(BuildContext context) async {
   if (await Permission.notification.isDenied) {
+    print("Izin notifikasi awal: Ditolak");
     await Permission.notification.request();
+    if (await Permission.notification.isGranted) {
+      print("Izin notifikasi diberikan setelah permintaan.");
+    } else {
+      print("Izin notifikasi tetap ditolak.");
+    }
+  } else if (await Permission.notification.isGranted) {
+    print("Izin notifikasi sudah diberikan.");
+  } else if (await Permission.notification.isPermanentlyDenied) {
+    print("Izin notifikasi ditolak secara permanen.");
   }
 
   final isAndroid13 = await isAndroid13OrHigher();
@@ -206,7 +194,6 @@ Future<void> requestPermissions(BuildContext context) async {
       await Permission.storage.request();
       await Permission.mediaLibrary.request();
       await Permission.scheduleExactAlarm.request();
-
       await Permission.manageExternalStorage.request();
     } else {
       var status = await Permission.manageExternalStorage.request();
@@ -222,6 +209,10 @@ Future<void> requestPermissions(BuildContext context) async {
 
   if (await Permission.camera.isDenied) {
     await Permission.camera.request();
+  }
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+    print("Izin notifikasi ditolak.");
   }
 
   if (await Permission.notification.isGranted &&

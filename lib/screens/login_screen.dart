@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _isGoogleLoading = false;
+  bool _isPasswordVisible = false;
 
   String? _emailError;
   String? _passwordError;
@@ -33,7 +34,6 @@ class _LoginScreenState extends State<LoginScreen> {
       _generalError = null;
     });
 
-    // Validasi input kosong
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() {
         if (_emailController.text.isEmpty) {
@@ -120,10 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(
                               fontSize: 12, fontWeight: FontWeight.normal)),
                     ),
-
                     const SizedBox(height: 30),
-
-                    // Email
                     if (_emailError != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 5),
@@ -141,8 +138,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       primaryColor: oren,
                       borderColor: oren,
                     ),
-
-                    // Password
                     if (_passwordError != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 5),
@@ -154,13 +149,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     CustomTextField(
                       controller: _passwordController,
-                      obscureText: true,
+                      obscureText: !_isPasswordVisible,
                       label: "Password",
                       primaryColor: oren,
                       borderColor: oren,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
                     ),
-
-                    // Error umum
                     if (_generalError != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 10),
@@ -170,10 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               const TextStyle(color: Colors.red, fontSize: 13),
                         ),
                       ),
-
                     const SizedBox(height: 10),
-
-                    // Tombol Masuk
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -198,10 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     fontSize: 15, color: Colors.white)),
                       ),
                     ),
-
                     const SizedBox(height: 10),
-
-                    // Login Google
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
@@ -228,10 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 20),
-
-                    // Daftar & Lupa Password
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

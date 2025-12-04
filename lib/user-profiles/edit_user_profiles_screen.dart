@@ -145,7 +145,11 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profil berhasil diperbarui')),
         );
-        Navigator.pop(context);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => ProfileScreen()),
+          (route) => false,
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal memperbarui profil: $e')),
@@ -191,8 +195,6 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-
-                      // Bagian Data Diri
                       const Text(
                         'Data Diri',
                         style: TextStyle(
@@ -212,10 +214,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                       _buildTextField(_namaIbuController, 'Nama Ibu'),
                       _buildTextField(_tempatLahirController, 'Tempat Lahir'),
                       _buildDateField(_tanggalLahirController, 'Tanggal Lahir'),
-
                       const SizedBox(height: 20),
-
-                      // Bagian Alamat
                       const Text(
                         'Alamat',
                         style: TextStyle(
@@ -233,10 +232,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                       _buildDropdownWilayah(),
                       _buildTextField(
                           _alamatLengkapController, 'Alamat Lengkap'),
-
                       const SizedBox(height: 20),
-
-                      // Bagian Sakramen
                       const Text(
                         'Data Sakramen',
                         style: TextStyle(
@@ -273,10 +269,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                         _buildTextField(
                             _tempatKrismaController, 'Tempat Krisma'),
                       ],
-
                       const SizedBox(height: 30),
-
-                      // Tombol Simpan
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: oren,
@@ -284,7 +277,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          elevation: 5, // Efek bayangan
+                          elevation: 5,
                           shadowColor: Colors.black,
                         ),
                         onPressed: _submitForm,
@@ -304,7 +297,6 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 40),
                     ],
                   ),

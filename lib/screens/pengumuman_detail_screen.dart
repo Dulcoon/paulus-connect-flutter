@@ -9,8 +9,13 @@ class PengumumanDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = '$BASE_URL_NO_API/images/${pengumuman['gambar']}';
-    print('Image URL: $imageUrl'); // Debugging line to check the image URL
+    // kalo pake server lokal pake ini
+    // final imageUrl = '$BASE_URL_NO_API/images/${pengumuman['gambar']}';
+
+    // kalo pake server hosting pake ini
+    final imageUrl = '$BASE_URL_NO_API/storage/images/${pengumuman['gambar']}';
+
+    print('Image URL: $imageUrl');
 
     return Scaffold(
       body: Stack(

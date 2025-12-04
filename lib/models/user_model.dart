@@ -5,12 +5,13 @@ class UserModel {
   final String role;
   final int isCompleted;
 
-  UserModel(
-      {required this.id,
-      required this.name,
-      required this.email,
-      required this.role,
-      required this.isCompleted});
+  UserModel({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.role,
+    required this.isCompleted,
+  });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -20,7 +21,8 @@ class UserModel {
       role: json['role'],
       isCompleted: json['isCompleted'] is bool
           ? (json['isCompleted'] ? 1 : 0)
-          : json['isCompleted'],
+          : int.tryParse(json['isCompleted'].toString()) ??
+              0, // Konversi ke int
     );
   }
 }

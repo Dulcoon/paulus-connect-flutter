@@ -17,7 +17,6 @@ class DetailDoaScreen extends StatefulWidget {
   });
 
   @override
-  // ignore: library_private_types_in_public_api
   _DetailDoaScreenState createState() => _DetailDoaScreenState();
 }
 
@@ -68,7 +67,6 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
       time.minute,
     );
 
-    // Konversi DateTime ke TZDateTime
     final tz.TZDateTime tzScheduledTime =
         tz.TZDateTime.from(scheduledTime, tz.local);
 
@@ -87,29 +85,28 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
   }
 
   Future<void> _initializeTts() async {
-    await _flutterTts.setLanguage("id-ID");
-    await _flutterTts.setPitch(1.0);
-    await _flutterTts.setSpeechRate(0.4);
+    try {
+      await _flutterTts.setLanguage("id-ID");
+      print("Bahasa berhasil diatur ke id-ID");
 
-    _voices = await _flutterTts.getVoices;
+      await _flutterTts.setPitch(1.0);
+      await _flutterTts.setSpeechRate(0.4);
 
-    _flutterTts.setProgressHandler((text, start, end, word) {
-      setState(() {
+      _voices = await _flutterTts.getVoices;
+      print("Voices tersedia: $_voices");
+
+      _flutterTts
+          .setProgressHandler((String text, int start, int end, String word) {
         int lineIndex = _findLineIndexByWord(word);
         if (lineIndex != -1) {
-          _readLineIndexes.add(lineIndex);
+          setState(() {
+            _readLineIndexes.add(lineIndex);
+          });
         }
       });
-    });
-
-    _flutterTts.setCompletionHandler(() {
-      setState(() {
-        _isPlaying = false;
-        _readLineIndexes.clear();
-      });
-    });
-
-    // Set default voice
+    } catch (e) {
+      print("Error saat menginisialisasi TTS: $e");
+    }
   }
 
   String _prepareTextForTts(String text) {
@@ -218,7 +215,6 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
         flexibleSpace: SafeArea(
           child: Stack(
             children: [
-              // Tombol Back
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
@@ -240,7 +236,6 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
                   ),
                 ),
               ),
-              // Judul
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -278,7 +273,7 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
                         line,
                         style: TextStyle(
                           fontSize: _fontSize,
-                          color: isRead ? Colors.black : Colors.black54,
+                          color: isRead ? oren : Colors.black54,
                           fontWeight:
                               isRead ? FontWeight.bold : FontWeight.normal,
                         ),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:paulus_connect/utils/constans.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/custom_text_field.dart';
+import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -19,6 +22,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
+
   Future<void> _resetPassword() async {
     setState(() {
       _isLoading = true;
@@ -32,7 +38,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         _passwordController.text,
         _confirmPasswordController.text,
       );
-      Navigator.popUntil(context, ModalRoute.withName('/login'));
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
+      );
     } catch (error) {
       setState(() {
         _errorMessage = error.toString();
@@ -47,17 +57,50 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reset Password')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: oren,
+        foregroundColor: Colors.white,
+        title:
+            const Text('Reset Password', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
+              const Text(
+                'Masukkan Password Baru',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password Baru'),
-                obscureText: true,
+                label: "Password Baru",
+                primaryColor: oren,
+                borderColor: oren,
+                obscureText: !_isPasswordVisible,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Password tidak boleh kosong';
@@ -69,11 +112,25 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 },
               ),
               const SizedBox(height: 10),
-              TextFormField(
+              CustomTextField(
                 controller: _confirmPasswordController,
-                decoration:
-                    const InputDecoration(labelText: 'Konfirmasi Password'),
-                obscureText: true,
+                label: "Konfirmasi Password",
+                primaryColor: oren,
+                borderColor: oren,
+                obscureText: !_isConfirmPasswordVisible,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isConfirmPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                    });
+                  },
+                ),
                 validator: (value) {
                   if (value != _passwordController.text) {
                     return 'Konfirmasi password tidak cocok';
@@ -91,14 +148,31 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ),
               const SizedBox(height: 20),
               _isLoading
-                  ? const CircularProgressIndicator()
+                  ? const Center(
+                      child: CircularProgressIndicator(color: oren),
+                    )
                   : ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           _resetPassword();
                         }
                       },
-                      child: const Text('Reset Password'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: oren,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        minimumSize: const Size.fromHeight(50),
+                      ),
+                      child: const Text(
+                        "Reset Password",
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
             ],
           ),

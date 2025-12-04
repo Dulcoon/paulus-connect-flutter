@@ -31,7 +31,6 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
   bool isSakramen(String jenisSakramen) {
     if (_userProfile == null) return false;
 
-    // Periksa jenis sakramen dan status penerimaan
     if (jenisSakramen.toLowerCase() == 'baptis' &&
         _userProfile!['sudah_baptis'] == 'sudah') {
       return true;
@@ -50,12 +49,12 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
   void initState() {
     super.initState();
     _fetchUserProfile();
-    _fetchRegistrationStatus(); // Periksa status pendaftaran
+    _fetchRegistrationStatus();
   }
 
   Future<void> _fetchUserProfile() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.fetchUserProfile(); // Fetch user profile data
+    await authProvider.fetchUserProfile();
     setState(() {
       _userProfile = authProvider.userProfile;
       _isLoading = false;
@@ -71,7 +70,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
     try {
       final response = await ApiService.checkRegistration(
         token,
-        widget.event['id'], // ID event sakramen
+        widget.event['id'],
       );
 
       setState(() {
@@ -86,7 +85,6 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
 
   Future<void> _downloadPdf(String url, String fileName) async {
     try {
-      // Meminta izin akses penyimpanan
       final hasPermission = await _requestPermission();
       if (!hasPermission) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -95,10 +93,8 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
         return;
       }
 
-      // Menentukan lokasi penyimpanan file
       final filePath = await _pathPdf(fileName);
 
-      // Menampilkan notifikasi progress
       const AndroidNotificationDetails androidPlatformChannelSpecifics =
           AndroidNotificationDetails(
         'download_channel',
@@ -121,13 +117,11 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
         platformChannelSpecifics,
       );
 
-      // Mengunduh file dari URL
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
 
-        // Perbarui notifikasi setelah unduhan selesai
         await flutterLocalNotificationsPlugin.show(
           0,
           'Unduhan Selesai',
@@ -143,7 +137,6 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
           ),
         );
 
-        // Buka file setelah selesai
         OpenFile.open(filePath);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -168,7 +161,6 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
     String filePath = '${directory.path}/$fileName';
     int counter = 1;
 
-    // Periksa apakah file sudah ada, jika ya tambahkan angka ke nama file
     while (await File(filePath).exists()) {
       final fileNameWithoutExtension = fileName.split('.').first;
       final fileExtension = fileName.split('.').last;
@@ -183,7 +175,6 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
   Future<bool> _requestPermission() async {
     if (Platform.isAndroid) {
       if (await _isAndroid11OrHigher()) {
-        // Untuk Android 11+ gunakan MANAGE_EXTERNAL_STORAGE
         final status = await Permission.manageExternalStorage.status;
         if (status.isDenied || status.isPermanentlyDenied) {
           final result = await Permission.manageExternalStorage.request();
@@ -191,7 +182,6 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
         }
         return status.isGranted;
       } else {
-        // Untuk Android 10 atau lebih rendah gunakan READ/WRITE_EXTERNAL_STORAGE
         final status = await Permission.storage.status;
         if (status.isDenied || status.isPermanentlyDenied) {
           final result = await Permission.storage.request();
@@ -200,7 +190,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
         return status.isGranted;
       }
     }
-    return false; // Untuk platform selain Android
+    return false;
   }
 
   Future<bool> _isAndroid11OrHigher() async {
@@ -210,14 +200,12 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
   Future<int> _getAndroidVersion() async {
     final osVersion = Platform.operatingSystemVersion;
 
-    // Gunakan regex untuk mengekstrak versi Android
     final match = RegExp(r'Android (\d+)').firstMatch(osVersion);
     if (match != null) {
       final version = int.tryParse(match.group(1) ?? '0') ?? 0;
       return version;
     }
 
-    // Jika tidak dapat diparsing, kembalikan 0 sebagai default
     return 0;
   }
 
@@ -246,19 +234,14 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                   const SizedBox(height: 16),
                   Center(
                     child: Text(
-                      event['nama_event']
-                          .toUpperCase(), // Ubah teks menjadi uppercase
+                      event['nama_event'].toUpperCase(),
                       style: const TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  // Header dengan background hijau
-
                   const SizedBox(height: 16),
-
-                  // Detail Event
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 30.0),
                     child: Column(
@@ -277,10 +260,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Tombol atau Pesan
                   if (isSakramen(widget.event['jenis_sakramen']))
-                    // Pesan jika sudah menerima sakramen
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Container(
@@ -302,7 +282,6 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                       ),
                     )
                   else if (_isRegistered)
-                    // Pesan jika sudah mendaftar
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Container(
@@ -341,7 +320,6 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () {
-                                  // Navigasi ke halaman pendaftaran ulang
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -381,15 +359,26 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () async {
-                                  print(widget.event['id']);
-                                  final url =
-                                      '$BASE_URL/pendaftars/${widget.event['id']}/download-pdf';
-                                  print(url);
-                                  final fileName =
-                                      'surat_bukti_sakramen_${event['jenis_sakramen']}_${widget.event['id']}.pdf';
-                                  print(fileName);
-                                  await _downloadPdf(
-                                      url, fileName); // Mengunduh PDF
+                                  final authProvider =
+                                      Provider.of<AuthProvider>(context,
+                                          listen: false);
+                                  final userId = authProvider.user?.id;
+                                  final sakramenId = widget.event['id'];
+
+                                  if (userId != null && sakramenId != null) {
+                                    final url =
+                                        '$BASE_URL/pendaftars/$sakramenId/$userId/download-pdf';
+                                    print(url);
+                                    final fileName =
+                                        'surat_bukti_sakramen_${widget.event['jenis_sakramen']}_$sakramenId.pdf';
+                                    await _downloadPdf(url, fileName);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Gagal mendapatkan user ID atau sakramen ID')),
+                                    );
+                                  }
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
@@ -421,12 +410,10 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
                       ),
                     )
                   else
-                    // Tombol Daftar jika belum mendaftar dan belum menerima sakramen
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: ElevatedButton(
                         onPressed: () {
-                          // Navigasi ke halaman pendaftaran
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -466,7 +453,6 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
     );
   }
 
-  // Widget untuk menampilkan detail dengan gaya baris
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -474,7 +460,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 2, // Bagian kiri (label)
+            flex: 2,
             child: Text(
               '$label:',
               style: const TextStyle(
@@ -485,7 +471,7 @@ class _SakramenEventDetailState extends State<SakramenEventDetail> {
             ),
           ),
           Expanded(
-            flex: 3, // Bagian kanan (value)
+            flex: 3,
             child: Text(
               value,
               style: const TextStyle(
