@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../services/notification_service.dart';
 import 'home_screen.dart';
 import '../utils/constans.dart';
 import 'forgot_password_email_screen.dart';
@@ -78,9 +79,8 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => HomeScreen()));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login Google gagal: ${e.toString()}")),
-      );
+      NotificationService()
+          .showError(context, "Login Google gagal: ${e.toString()}");
     }
 
     setState(() => _isGoogleLoading = false);

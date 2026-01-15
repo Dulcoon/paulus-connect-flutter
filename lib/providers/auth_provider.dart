@@ -34,14 +34,21 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> loginWithGoogle() async {
-    final Map<String, dynamic> response = await ApiService.loginWithGoogle();
-    if (response['token'] != null) {
-      _token = response['token'] as String;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', _token!);
-      notifyListeners();
-    } else {
-      throw Exception("Login gagal");
+    try {
+      print('Starting Google login...');
+      final Map<String, dynamic> response = await ApiService.loginWithGoogle();
+      print('Google login API response: $response');
+      if (response['token'] != null) {
+        _token = response['token'] as String;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', _token!);
+        notifyListeners();
+      } else {
+        throw Exception("Login gagal: Token tidak ditemukan dalam respons");
+      }
+    } catch (e) {
+      print('Error in loginWithGoogle: $e');
+      throw e;
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import '../utils/constans.dart';
+import '../services/notification_service.dart';
 
 class TextMisaDetail extends StatefulWidget {
   final String title;
@@ -127,14 +128,15 @@ class _TextMisaDetailState extends State<TextMisaDetail> {
                     });
                   },
                   onError: (error) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $error')),
+                    NotificationService().showError(
+                      context,
+                      'Terjadi kesalahan saat memuat PDF: $error',
                     );
                   },
                   onPageError: (page, error) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Page error on page $page: $error')),
+                    NotificationService().showError(
+                      context,
+                      'Terjadi kesalahan pada halaman $page: $error',
                     );
                   },
                 ),

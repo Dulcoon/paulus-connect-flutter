@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart';
 import '../utils/constans.dart';
 import '../screens/profile_screen.dart';
 
@@ -81,9 +82,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
         _wilayahList = wilayah;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat data wilayah: $e')),
-      );
+      NotificationService().showError(context, 'Gagal memuat data wilayah: $e');
     }
   }
 
@@ -97,9 +96,7 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
       final token = authProvider.token;
 
       if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Token tidak valid')),
-        );
+        NotificationService().showError(context, 'Token tidak valid');
         setState(() {
           _isLoading = false;
         });
@@ -142,18 +139,16 @@ class _EditUserProfileScreenState extends State<EditUserProfileScreen> {
 
       try {
         await ApiService.updateUserProfile(token, data);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil berhasil diperbarui')),
-        );
+        NotificationService()
+            .showSuccess(context, 'Profil berhasil diperbarui');
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => ProfileScreen()),
           (route) => false,
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memperbarui profil: $e')),
-        );
+        NotificationService()
+            .showError(context, 'Gagal memperbarui profil: $e');
       } finally {
         setState(() {
           _isLoading = false;

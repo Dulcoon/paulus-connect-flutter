@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constans.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart';
 import '../screens/home_screen.dart';
 
 class UserDataScreen extends StatefulWidget {
@@ -60,22 +61,30 @@ class _UserDataScreenState extends State<UserDataScreen> {
 
       if (token == null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Token tidak valid')),
-          );
+          if (mounted) {
+            NotificationService().showError(
+              context,
+              'Gagal memuat data wilayah. Token tidak tersedia.',
+            );
+          }
         });
         return;
       }
 
       final wilayah = await ApiService.getWilayah();
-      setState(() {
-        _wilayahList = wilayah;
-      });
+      if (mounted) {
+        setState(() {
+          _wilayahList = wilayah;
+        });
+      }
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat data wilayah: $e')),
-        );
+        if (mounted) {
+          NotificationService().showError(
+            context,
+            'Gagal memuat data wilayah: $e',
+          );
+        }
       });
     }
   }
@@ -94,8 +103,10 @@ class _UserDataScreenState extends State<UserDataScreen> {
       final token = authProvider.token;
 
       if (userId == null || token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User atau token tidak valid')),
+        if (!mounted) return;
+        NotificationService().showError(
+          context,
+          'User atau token tidak valid',
         );
         setState(() {
           _isLoading = false;
@@ -133,30 +144,54 @@ class _UserDataScreenState extends State<UserDataScreen> {
 
       try {
         await ApiService.saveUserData(token, userId, data);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Data berhasil disimpan')),
+
+        if (!mounted) return;
+
+        // Update auth provider
+        await authProvider.fetchUserData();
+
+        if (!mounted) return;
+
+        // Tampilkan notifikasi sukses
+        NotificationService().showSuccess(
+          context,
+          'Data berhasil disimpan! Selamat datang di Paulus Connect.',
         );
+
+        // Clear form fields
         _clearFormFields();
-        await _showSuccessDialog();
+
+        // Delay untuk user bisa melihat notifikasi
+        await Future.delayed(const Duration(seconds: 2));
+
+        if (!mounted) return;
+
+        // Kembali ke home
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
           (route) => false,
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan data: $e')),
+        if (!mounted) return;
+        NotificationService().showError(
+          context,
+          'Gagal menyimpan data: $e',
         );
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
 
   Future<void> _selectDate(
-      BuildContext context, Function(DateTime) onSelected) async {
+    BuildContext context,
+    Function(DateTime) onSelected,
+  ) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -173,46 +208,26 @@ class _UserDataScreenState extends State<UserDataScreen> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Konfirmasi'),
-              content: Text('Apakah yakin ingin menyimpan data?'),
+              title: const Text('Konfirmasi'),
+              content: const Text('Apakah yakin ingin menyimpan data?'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
-                  child: Text('Tidak'),
+                  child: const Text('Tidak'),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(true);
                   },
-                  child: Text('Ya'),
+                  child: const Text('Ya'),
                 ),
               ],
             );
           },
         ) ??
         false;
-  }
-
-  Future<void> _showSuccessDialog() async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Sukses'),
-          content: const Text('Data berhasil disimpan'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _clearFormFields() {
@@ -239,26 +254,50 @@ class _UserDataScreenState extends State<UserDataScreen> {
   }
 
   @override
+  void dispose() {
+    _namaLengkapController.dispose();
+    _noHpController.dispose();
+    _namaAyahController.dispose();
+    _namaIbuController.dispose();
+    _tempatLahirController.dispose();
+    _tanggalLahirController.dispose();
+    _kecamatanController.dispose();
+    _alamatLengkapController.dispose();
+    _tempatBaptisController.dispose();
+    _tempatKomuniController.dispose();
+    _tempatKrismaController.dispose();
+    _tanggalBaptisController.dispose();
+    _tanggalKomuniController.dispose();
+    _tanggalKrismaController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgCollor,
       appBar: AppBar(
         backgroundColor: oren,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           color: Colors.white,
           onPressed: () {
-            Navigator.pushNamed(context, '/home');
+            Navigator.pop(context);
           },
         ),
         title: const Text(
           'User Data',
           style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 19, color: Colors.white),
+            fontWeight: FontWeight.bold,
+            fontSize: 19,
+            color: Colors.white,
+          ),
         ),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: oren),
+            )
           : SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -272,11 +311,12 @@ class _UserDataScreenState extends State<UserDataScreen> {
                           Text.rich(
                             TextSpan(
                               children: [
-                                const TextSpan(
+                                TextSpan(
                                   text: 'Silahkan Lengkapi Data ',
                                   style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 TextSpan(
                                   text: ' \nAnda',
@@ -300,10 +340,14 @@ class _UserDataScreenState extends State<UserDataScreen> {
                       _buildTextField(_tempatLahirController, 'Tempat Lahir'),
                       _buildDateField(_tanggalLahirController, 'Tanggal Lahir'),
                       _buildTextField(
-                          _kecamatanController, 'Kecamatan Tempat Tinggal'),
+                        _kecamatanController,
+                        'Kecamatan Tempat Tinggal',
+                      ),
                       _buildDropdownWilayah(),
                       _buildTextField(
-                          _alamatLengkapController, 'Alamat Lengkap'),
+                        _alamatLengkapController,
+                        'Alamat Lengkap',
+                      ),
                       _buildSakramenDropdown('Baptis', _selectedBaptis,
                           (value) {
                         setState(() {
@@ -312,9 +356,13 @@ class _UserDataScreenState extends State<UserDataScreen> {
                       }),
                       if (_selectedBaptis == 'sudah') ...[
                         _buildDateField(
-                            _tanggalBaptisController, 'Tanggal Baptis'),
+                          _tanggalBaptisController,
+                          'Tanggal Baptis',
+                        ),
                         _buildTextField(
-                            _tempatBaptisController, 'Tempat Baptis'),
+                          _tempatBaptisController,
+                          'Tempat Baptis',
+                        ),
                       ],
                       _buildSakramenDropdown('Komuni', _selectedKomuni,
                           (value) {
@@ -324,9 +372,13 @@ class _UserDataScreenState extends State<UserDataScreen> {
                       }),
                       if (_selectedKomuni == 'sudah') ...[
                         _buildDateField(
-                            _tanggalKomuniController, 'Tanggal Komuni'),
+                          _tanggalKomuniController,
+                          'Tanggal Komuni',
+                        ),
                         _buildTextField(
-                            _tempatKomuniController, 'Tempat Komuni'),
+                          _tempatKomuniController,
+                          'Tempat Komuni',
+                        ),
                       ],
                       _buildSakramenDropdown('Krisma', _selectedKrisma,
                           (value) {
@@ -336,12 +388,16 @@ class _UserDataScreenState extends State<UserDataScreen> {
                       }),
                       if (_selectedKrisma == 'sudah') ...[
                         _buildDateField(
-                            _tanggalKrismaController, 'Tanggal Krisma'),
+                          _tanggalKrismaController,
+                          'Tanggal Krisma',
+                        ),
                         _buildTextField(
-                            _tempatKrismaController, 'Tempat Krisma'),
+                          _tempatKrismaController,
+                          'Tempat Krisma',
+                        ),
                       ],
                       const SizedBox(height: 20),
-                      Container(
+                      SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -351,18 +407,24 @@ class _UserDataScreenState extends State<UserDataScreen> {
                               borderRadius: BorderRadius.circular(15),
                             ),
                           ),
-                          onPressed: _submitForm,
+                          onPressed: _isLoading ? null : _submitForm,
                           child: _isLoading
                               ? const SizedBox(
                                   height: 21,
                                   width: 21,
-                                  child: const CircularProgressIndicator(
+                                  child: CircularProgressIndicator(
                                     color: Colors.white,
+                                    strokeWidth: 2,
                                   ),
                                 )
-                              : const Text("Submit",
+                              : const Text(
+                                  "Submit",
                                   style: TextStyle(
-                                      fontSize: 18, color: Colors.white)),
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 40)
@@ -547,7 +609,10 @@ class _UserDataScreenState extends State<UserDataScreen> {
   }
 
   Widget _buildSakramenDropdown(
-      String label, String? value, Function(String?) onChanged) {
+    String label,
+    String? value,
+    Function(String?) onChanged,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Theme(

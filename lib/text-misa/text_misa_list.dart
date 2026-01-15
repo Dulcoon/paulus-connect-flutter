@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import '../services/api_service.dart';
 import 'text_misa_detail.dart';
 import '../utils/constans.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart';
 
 class TextMisaList extends StatefulWidget {
   const TextMisaList({super.key});
@@ -30,10 +32,10 @@ class _TextMisaListState extends State<TextMisaList> {
 
     while (retryCount < 3) {
       try {
-        final url = '${BASE_URL_NO_API}/misa-pdf/$fileName';
+        final url = '${BASE_URL_NO_API}/storage/misa_pdfs/$fileName';
         final directory = await getTemporaryDirectory();
         final filePath = '${directory.path}/$fileName';
-
+        print(url);
         await dio.download(
           url,
           filePath,
@@ -56,6 +58,8 @@ class _TextMisaListState extends State<TextMisaList> {
       } catch (e) {
         retryCount++;
         if (retryCount >= 3) {
+          print(e);
+          print(url);
           throw Exception(
               'Gagal mengunduh file setelah beberapa kali percobaan: $e');
         }
@@ -191,9 +195,9 @@ class _TextMisaListState extends State<TextMisaList> {
                                   ),
                                 );
                               } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text('Gagal membuka file: $e')),
+                                NotificationService().showError(
+                                  context,
+                                  'Gagal mengunduh file: $e',
                                 );
                               } finally {
                                 setState(() {

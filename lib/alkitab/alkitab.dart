@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../utils/constans.dart';
 import 'package:xml/xml.dart' as xml;
+import '../services/notification_service.dart';
 
 class AlkitabScreen extends StatefulWidget {
   const AlkitabScreen({super.key});
@@ -59,8 +60,9 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
         throw Exception('Failed to load data');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal memuat data Alkitab')),
+      NotificationService().showError(
+        context,
+        'Gagal memuat data Alkitab. Silakan coba lagi.',
       );
     } finally {
       setState(() {
@@ -191,11 +193,9 @@ class _AlkitabScreenState extends State<AlkitabScreen> {
                           if (_searchQuery.isNotEmpty) {
                             _fetchBibleData(_searchQuery);
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Masukkan referensi ayat terlebih dahulu'),
-                              ),
+                            NotificationService().showInfo(
+                              context,
+                              'Silakan masukkan referensi ayat untuk mencari.',
                             );
                           }
                         },

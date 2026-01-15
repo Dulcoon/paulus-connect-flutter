@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -5,6 +6,7 @@ import '../utils/constans.dart';
 import '../widgets/custom_text_field.dart';
 import 'home_screen.dart';
 import 'package:flutter/gestures.dart';
+import '../services/notification_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,12 +25,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
+  // Error messages for each field
+  String? _nameError;
+  String? _emailError;
+  String? _passwordError;
+
   void _register() async {
     setState(() => _isLoading = true);
 
+    // Clear previous errors
+    setState(() {
+      _nameError = null;
+      _emailError = null;
+      _passwordError = null;
+    });
+
     try {
       if (_passwordController.text != _confirmPasswordController.text) {
-        throw Exception("Password dan Konfirmasi Password tidak cocok.");
+        setState(() {
+          _passwordError = "Password dan Konfirmasi Password tidak cocok.";
+        });
+        setState(() => _isLoading = false);
+        return;
       }
 
       await Provider.of<AuthProvider>(context, listen: false).register(
@@ -42,9 +60,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Registrasi gagal: ${e.toString()}"),
-      ));
+      String errorMessage = e.toString();
+      // Extract JSON from exception message (remove "Exception: " prefix)
+      String jsonPart = errorMessage.replaceFirst('Exception: ', '');
+      try {
+        Map<String, dynamic> errorData = jsonDecode(jsonPart);
+        Map<String, dynamic> errors = errorData['errors'] ?? {};
+        setState(() {
+          _nameError = errors['name']?.first;
+          _emailError = errors['email']?.first;
+          _passwordError = errors['password']?.first;
+        });
+      } catch (parseError) {
+        // If parsing fails, show as snackbar
+        NotificationService().showError(
+          context,
+          'Pendaftaran gagal: $errorMessage',
+        );
+      }
     }
 
     setState(() => _isLoading = false);
@@ -93,19 +126,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: _nameController,
                         label: "Nama Lengkap",
                         primaryColor: oren,
-                        borderColor: oren,
+                        borderColor: _nameError != null ? Colors.red : oren,
+                        errorText: _nameError,
                       ),
                       CustomTextField(
                         controller: _emailController,
                         label: "Email Address",
                         primaryColor: oren,
-                        borderColor: oren,
+                        borderColor: _emailError != null ? Colors.red : oren,
+                        errorText: _emailError,
                       ),
                       CustomTextField(
                         controller: _passwordController,
                         label: "Kata sandi",
                         primaryColor: oren,
-                        borderColor: oren,
+                        borderColor: _passwordError != null ? Colors.red : oren,
+                        errorText: _passwordError,
                         obscureText: !_isPasswordVisible,
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -125,7 +161,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: _confirmPasswordController,
                         label: "Konfirmasi kata sandi",
                         primaryColor: oren,
-                        borderColor: oren,
+                        borderColor: _passwordError != null ? Colors.red : oren,
+                        errorText: _passwordError,
                         obscureText: !_isConfirmPasswordVisible,
                         suffixIcon: IconButton(
                           icon: Icon(

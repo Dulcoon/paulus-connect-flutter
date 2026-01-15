@@ -10,6 +10,8 @@ import 'bottom_navbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import '../main.dart';
+import 'dart:async';
+import 'pengumuman_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// ===== PERTAHANKAN COMPLETION PROMPT (TANPA PERUBAHAN) =====
 class CompletionPrompt extends StatelessWidget {
   final VoidCallback onPressed;
 
@@ -142,6 +145,7 @@ class CompletionPrompt extends StatelessWidget {
   }
 }
 
+// ===== PERTAHANKAN UNCOMPLETION PROMPT (TANPA PERUBAHAN) =====
 class UnCompletionPrompt extends StatelessWidget {
   const UnCompletionPrompt({super.key});
 
@@ -225,13 +229,33 @@ class _HomeContentState extends State<HomeContent> {
     'assets/images/carousel item4.jpg',
   ];
   int _currentIndex = 0;
+  String _currentTime = '';
+  late Timer _timer;
 
   @override
   void initState() {
     super.initState();
+    _updateTime();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _updateTime();
+    });
     _checkCompletionStatus();
     _fetchPengumuman();
     requestPermissions(context);
+  }
+
+  void _updateTime() {
+    setState(() {
+      final now = DateTime.now();
+      _currentTime =
+          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   Future<void> _fetchPengumuman() async {
@@ -274,6 +298,7 @@ class _HomeContentState extends State<HomeContent> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final isCompleted = authProvider.user?.isCompleted == 1;
+    final userName = authProvider.user?.name ?? 'Guest';
 
     return _isLoading
         ? const Center(
@@ -287,59 +312,87 @@ class _HomeContentState extends State<HomeContent> {
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
+
+                      // ===== HEADER SECTION (PROPORSIONAL) =====
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "Salam Sejahtera,",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.normal,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Salam Sejahtera",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 1),
-                              Text(
-                                "${authProvider.user?.name}",
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
+                                const SizedBox(height: 8),
+                                Text(
+                                  userName,
+                                  style: const TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.symmetric(
-                                vertical: BorderSide(
-                                  color: Colors.black26,
-                                  width: 2,
-                                ),
-                                horizontal: BorderSide(
-                                  color: Colors.black26,
-                                  width: 2,
-                                ),
-                              ),
+                              ],
                             ),
-                            width: 55,
-                            height: 55,
-                            child: Image.asset(
-                              'assets/images/notif.png',
-                              width: 0,
-                              height: 0,
+                          ),
+                          // ===== LIVE CLOCK SECTION (MENGGANTI LONCENG) =====
+                          Container(
+                            width: 75,
+                            height: 75,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 15,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _currentTime,
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: oren,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'WIB',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
+
+                      const SizedBox(height: 28),
+
+                      // ===== COMPLETION PROMPT (PERTAHANKAN ASSET 3D) =====
                       if (!isCompleted)
                         CompletionPrompt(
                           onPressed: () {
@@ -347,218 +400,384 @@ class _HomeContentState extends State<HomeContent> {
                           },
                         ),
                       if (isCompleted) const UnCompletionPrompt(),
-                      const SizedBox(height: 20),
-                      Divider(
-                        color: Colors.black.withOpacity(0.2),
-                        thickness: 1,
-                        height: 20,
-                      ),
-                      const SizedBox(height: 20),
+
+                      const SizedBox(height: 28),
+
+                      // ===== CAROUSEL SECTION =====
                       Column(
                         children: [
-                          Column(
-                            children: [
-                              CarouselSlider(
-                                options: CarouselOptions(
-                                  height: 120,
-                                  aspectRatio: 21 / 9,
-                                  viewportFraction: 0.9,
-                                  enableInfiniteScroll: true,
-                                  autoPlay: true,
-                                  autoPlayInterval: const Duration(seconds: 3),
-                                  autoPlayAnimationDuration:
-                                      const Duration(milliseconds: 800),
-                                  enlargeCenterPage: true,
-                                  onPageChanged: (index, reason) {
-                                    setState(() {
-                                      _currentIndex = index;
-                                    });
-                                  },
-                                ),
-                                items: imagePaths.map((imagePath) {
-                                  return Builder(
-                                    builder: (BuildContext context) {
-                                      return ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: Image.asset(
-                                          imagePath,
-                                          fit: BoxFit.cover,
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                        ),
-                                      );
-                                    },
-                                  );
-                                }).toList(),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children:
-                                    imagePaths.asMap().entries.map((entry) {
-                                  return AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    width:
-                                        _currentIndex == entry.key ? 12.0 : 8.0,
-                                    height: 8.0,
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 4.0, vertical: 10.0),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: _currentIndex == entry.key
-                                          ? oren
-                                          : Colors.grey,
+                          CarouselSlider(
+                            options: CarouselOptions(
+                              height: 140,
+                              aspectRatio: 21 / 9,
+                              viewportFraction: 0.95,
+                              enableInfiniteScroll: true,
+                              autoPlay: true,
+                              autoPlayInterval: const Duration(seconds: 4),
+                              autoPlayAnimationDuration:
+                                  const Duration(milliseconds: 800),
+                              enlargeCenterPage: true,
+                              onPageChanged: (index, reason) {
+                                setState(() {
+                                  _currentIndex = index;
+                                });
+                              },
+                            ),
+                            items: imagePaths.map((imagePath) {
+                              return Builder(
+                                builder: (BuildContext context) {
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Image.asset(
+                                      imagePath,
+                                      fit: BoxFit.cover,
+                                      width: MediaQuery.of(context).size.width,
                                     ),
                                   );
-                                }).toList(),
-                              ),
-                            ],
+                                },
+                              );
+                            }).toList(),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 14),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _buildIconButton(
-                                width: 160,
-                                height: 90,
-                                imagePath:
-                                    'assets/images/bookmark-dynamic-color.png',
-                                label: 'Doa-doa',
-                                onPressed: () {
-                                  Navigator.pushNamed(context, '/doa');
-                                },
-                              ),
-                              _buildIconButton(
-                                width: 160,
-                                height: 90,
-                                imagePath:
-                                    'assets/images/pin-dynamic-color.png',
-                                label: 'Text Misa',
-                                onPressed: () {
-                                  Navigator.pushNamed(context, '/text-misa');
-                                },
-                                imageWidth: 56,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _buildIconButton(
-                                width: 160,
-                                height: 90,
-                                imagePath:
-                                    'assets/images/calender-dynamic-color.png',
-                                label: 'Kalender Liturgi',
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, '/kalender-liturgi');
-                                },
-                              ),
-                              _buildIconButton(
-                                width: 160,
-                                height: 90,
-                                imagePath:
-                                    'assets/images/bell-dynamic-gradient.png',
-                                label: 'Sakramen',
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, '/sakramen-list');
-                                },
-                              ),
-                            ],
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: imagePaths.asMap().entries.map((entry) {
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                width: _currentIndex == entry.key ? 24.0 : 6.0,
+                                height: 6.0,
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 4.0, vertical: 10.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(3),
+                                  color: _currentIndex == entry.key
+                                      ? oren
+                                      : Colors.grey[300],
+                                ),
+                              );
+                            }).toList(),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      Divider(
-                        color: Colors.black.withOpacity(0.2),
-                        thickness: 1,
-                        height: 40,
-                      ),
+
+                      const SizedBox(height: 32),
+
+                      // ===== SECTION HEADER: FITUR UTAMA =====
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: oren,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'Fitur Utama',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // ===== MENU GRID (PERTAHANKAN ASSET 3D) - EXPANDED =====
+                      Row(
                         children: [
                           _buildIconButton(
-                            width: 80,
-                            height: 80,
-                            icon: CupertinoIcons.envelope_open,
-                            label: 'Persembahan',
+                            imagePath:
+                                'assets/images/bookmark-dynamic-color.png',
+                            label: 'Doa-doa',
+                            accentColor: oren,
                             onPressed: () {
-                              Navigator.pushNamed(context, '/persembahan');
+                              Navigator.pushNamed(context, '/doa');
                             },
                           ),
+                          const SizedBox(width: 14),
                           _buildIconButton(
-                            width: 80,
-                            height: 80,
-                            icon: CupertinoIcons.heart_circle_fill,
-                            label: 'Donasi',
+                            imagePath: 'assets/images/pin-dynamic-color.png',
+                            label: 'Text Misa',
+                            accentColor: const Color(0xFF6366F1),
                             onPressed: () {
-                              Navigator.pushNamed(context, '/donasi');
+                              Navigator.pushNamed(context, '/text-misa');
                             },
                           ),
                         ],
                       ),
-                      Divider(
-                        color: Colors.black.withOpacity(0.2),
-                        thickness: 1,
-                        height: 40,
+
+                      const SizedBox(height: 18),
+
+                      Row(
+                        children: [
+                          _buildIconButton(
+                            imagePath:
+                                'assets/images/calender-dynamic-color.png',
+                            label: 'Kalender Liturgi',
+                            accentColor: const Color(0xFF10B981),
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/kalender-liturgi');
+                            },
+                          ),
+                          const SizedBox(width: 14),
+                          _buildIconButton(
+                            imagePath:
+                                'assets/images/bell-dynamic-gradient.png',
+                            label: 'Sakramen',
+                            accentColor: const Color(0xFFF59E0B),
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/sakramen-list');
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10),
+
+                      const SizedBox(height: 32),
+
+                      // ===== SECTION HEADER: AKSI CEPAT =====
+                      Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: oren,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'Aksi Cepat',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // ===== MODERN ACTION CARDS (PERSEMBAHAN & DONASI) =====
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildModernActionCard(
+                              icon: Icons.volunteer_activism_outlined,
+                              title: 'Persembahan',
+                              subtitle: 'Riwayat persembahan',
+                              color: const Color(0xFF10B981),
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/persembahan');
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: _buildModernActionCard(
+                              icon: Icons.favorite,
+                              title: 'Donasi',
+                              subtitle: 'Berikan dukungan',
+                              color: oren,
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/donasi');
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // ===== PENGUMUMAN SECTION (MODERN DESIGN) =====
+                      // ...existing code...
+
+                      // ===== PENGUMUMAN SECTION (MODERN DESIGN) =====
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              SizedBox(width: 10),
-                              Text(
-                                'Pengumuman',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 4,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: oren,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  const Text(
+                                    'Pengumuman Terbaru',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
                               ),
+                              if (_pengumuman.isNotEmpty)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: oren.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '${_pengumuman.length}',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: oren,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 16),
                           if (_isLoading)
                             const Center(
-                                child: CircularProgressIndicator(color: oren))
+                              child: CircularProgressIndicator(color: oren),
+                            )
                           else if (_pengumuman.isEmpty)
-                            const Text('Tidak ada pengumuman saat ini.')
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.grey[200]!,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    color: Colors.grey[400],
+                                    size: 28,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Belum ada pengumuman',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
                           else
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: _pengumuman.length,
-                              itemBuilder: (context, index) {
-                                final pengumuman = _pengumuman[index];
-                                return _buildNewsButton(
-                                  title: pengumuman['judul'],
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            PengumumanDetailScreen(
-                                                pengumuman: pengumuman),
-                                      ),
+                            Column(
+                              children: [
+                                // Display max 3 pengumuman
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: _pengumuman.length > 3
+                                      ? 3
+                                      : _pengumuman.length,
+                                  itemBuilder: (context, index) {
+                                    final pengumuman = _pengumuman[index];
+                                    return _buildModernNewsCard(
+                                      title: pengumuman['judul'],
+                                      index: index + 1,
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                PengumumanDetailScreen(
+                                                    pengumuman: pengumuman),
+                                          ),
+                                        );
+                                      },
                                     );
                                   },
-                                );
-                              },
+                                ),
+                                // Show "Lihat Lainnya" button jika pengumuman > 3
+                                if (_pengumuman.length > 3) ...[
+                                  const SizedBox(height: 16),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: oren,
+                                        side: const BorderSide(
+                                          color: oren,
+                                          width: 2,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const PengumumanListScreen(),
+                                          ),
+                                        );
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Text(
+                                            'Lihat Pengumuman Lainnya',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Icon(
+                                            Icons.arrow_forward_ios,
+                                            size: 14,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Versi 1.0.0',
+
+// ...existing code...
+
+                      const SizedBox(height: 24),
+
+                      Text(
+                        'v1.0.0',
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.w300,
-                          color: Colors.black54,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey[500],
                         ),
                       ),
+
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -569,101 +788,256 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Widget _buildIconButton({
-    String? imagePath,
-    IconData? icon,
+    required String imagePath,
     required String label,
-    double? imageWidth,
-    double? width,
-    double? height,
     required VoidCallback onPressed,
+    required Color accentColor,
   }) {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            elevation: 0,
-            padding: EdgeInsets.zero,
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            fixedSize:
-                width != null && height != null ? Size(width, height) : null,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          height: 150,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withOpacity(0.12),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-          child: imagePath != null
-              ? Image.asset(
-                  imagePath,
-                  width: imageWidth ?? 70,
-                  height: height != null ? height - 20 : null,
-                  fit: BoxFit.contain,
-                )
-              : Icon(
-                  icon,
-                  size: imageWidth ?? 45,
-                  color: Colors.black,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // ===== 3D ICON (HERO) =====
+              Image.asset(
+                imagePath,
+                width: 56,
+                height: 56,
+                fit: BoxFit.contain,
+              ),
+
+              const SizedBox(height: 14),
+
+              // ===== LABEL =====
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
                 ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 4),
-        Text(label),
-      ],
+      ),
     );
   }
 
-  Widget _buildNewsButton({
+  // ===== MODERN ACTION CARD (PERSEMBAHAN & DONASI) =====
+  Widget _buildModernActionCard({
+    required IconData icon,
     required String title,
+    required String subtitle,
+    required Color color,
     required VoidCallback onPressed,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 15),
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [color, color.withOpacity(0.85)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 12,
+              spreadRadius: 0,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
-        child: Row(
-          children: [
-            Expanded(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    child: Icon(
+                      icon,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
-                  const SizedBox(height: 5),
-                  const Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  const SizedBox(height: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Baca Selengkapnya',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w300,
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                      const Icon(
-                        Icons.arrow_forward,
-                        color: Colors.black54,
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white70,
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget sectionDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 28),
+      child: Row(
+        children: [
+          Expanded(child: Divider(color: Colors.grey.shade300)),
+          const SizedBox(width: 8),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: oren,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Divider(color: Colors.grey.shade300)),
+        ],
+      ),
+    );
+  }
+
+  // ===== MODERN NEWS CARD (PENGUMUMAN) =====
+  Widget _buildModernNewsCard({
+    required String title,
+    required int index,
+    required VoidCallback onPressed,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 10,
+                spreadRadius: 0,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(14),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: oren.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$index',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: oren,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Tap untuk baca selengkapnya',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: oren.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: oren,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

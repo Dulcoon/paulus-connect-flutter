@@ -9,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final bool obscureText;
   final Widget? suffixIcon;
+  final String? errorText;
 
   const CustomTextField({
     super.key,
@@ -19,6 +20,7 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.obscureText = false,
     this.suffixIcon,
+    this.errorText,
   });
 
   @override
@@ -43,11 +45,20 @@ class CustomTextField extends StatelessWidget {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.grey.shade500),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: Colors.red),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: Colors.red),
             ),
             labelText: label,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
             suffixIcon: suffixIcon,
+            errorText: errorText,
           ),
         ),
       ),

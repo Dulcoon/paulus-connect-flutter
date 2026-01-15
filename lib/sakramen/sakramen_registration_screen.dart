@@ -6,6 +6,8 @@ import '../widgets/custom_date_field.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import '../utils/constans.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../services/notification_service.dart';
 
 class SakramenRegistrationScreen extends StatefulWidget {
   final Map<String, dynamic> event;
@@ -18,11 +20,16 @@ class SakramenRegistrationScreen extends StatefulWidget {
       _SakramenRegistrationScreenState();
 }
 
-class _SakramenRegistrationScreenState
-    extends State<SakramenRegistrationScreen> {
+class _SakramenRegistrationScreenState extends State<SakramenRegistrationScreen>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic>? _defaultData;
   bool _isLoading = true;
+  bool _isDarkMode = false;
+  bool _isSubmitting = false;
+
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
 
   String? _selectedJenisKelamin;
 
@@ -46,7 +53,21 @@ class _SakramenRegistrationScreenState
   @override
   void initState() {
     super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
+    );
+    _fadeController.forward();
     _loadDefaultData();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDefaultData() async {
@@ -76,17 +97,18 @@ class _SakramenRegistrationScreenState
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat data default: $e')),
+        NotificationService().showError(
+          context,
+          'Gagal memuat data. Silakan coba lagi.',
         );
       }
     } else {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Token tidak valid. Silakan login ulang.')),
+      NotificationService().showError(
+        context,
+        'Token tidak valid. Silakan login ulang.',
       );
     }
   }
@@ -119,6 +141,10 @@ class _SakramenRegistrationScreenState
 
   Future<void> _submitRegistration() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isSubmitting = true;
+      });
+
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final token = authProvider.token;
 
@@ -148,8 +174,9 @@ class _SakramenRegistrationScreenState
 
           await ApiService.submitRegistrationWithFiles(token, data, files);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Pendaftaran berhasil!')),
+          NotificationService().showSuccess(
+            context,
+            'Pendaftaran berhasil dikirim.',
           );
           Navigator.pushNamedAndRemoveUntil(
             context,
@@ -157,14 +184,22 @@ class _SakramenRegistrationScreenState
             (route) => false,
           );
         } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal mendaftarkan: $e')),
+          NotificationService().showError(
+            context,
+            'Gagal mengirim pendaftaran. Silakan coba lagi.',
           );
+        } finally {
+          setState(() {
+            _isSubmitting = false;
+          });
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Token tidak valid. Silakan login ulang.')),
+        setState(() {
+          _isSubmitting = false;
+        });
+        NotificationService().showError(
+          context,
+          'Token tidak valid. Silakan login ulang.',
         );
       }
     }
@@ -174,141 +209,180 @@ class _SakramenRegistrationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pendaftaran ${widget.event['jenis_sakramen']}',
-            style: const TextStyle(color: Colors.white)),
+        title: Text(
+          'Pendaftaran ${widget.event['jenis_sakramen']}',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: oren,
         foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(_isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () {
+              setState(() {
+                _isDarkMode = !_isDarkMode;
+              });
+            },
+          ),
+        ],
       ),
-      backgroundColor: bgCollor,
+      backgroundColor: _isDarkMode ? Colors.grey[900] : bgCollor,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTextField(_namaLengkapController, 'Nama Lengkap'),
-                    _buildTextField(_tempatLahirController, 'Tempat Lahir'),
-                    CustomDateField(
-                      controller: _tanggalLahirController,
-                      label: 'Tanggal Lahir',
-                      onDateSelected: (date) {
-                        _tanggalLahirController.text =
-                            "${date.toLocal()}".split(' ')[0];
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 15),
-                      child: DropdownButtonFormField<String>(
-                        value: _selectedJenisKelamin,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(color: Colors.green),
+          : FadeTransition(
+              opacity: _fadeAnimation,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Personal Information Card
+                      _buildSectionCard(
+                        title: 'Informasi Pribadi',
+                        icon: Icons.person,
+                        children: [
+                          _buildTextField(_namaLengkapController,
+                              'Nama Lengkap', Icons.person_outline),
+                          _buildTextField(_tempatLahirController,
+                              'Tempat Lahir', Icons.location_on_outlined),
+                          CustomDateField(
+                            controller: _tanggalLahirController,
+                            label: 'Tanggal Lahir',
+                            onDateSelected: (date) {
+                              _tanggalLahirController.text =
+                                  "${date.toLocal()}".split(' ')[0];
+                            },
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: const BorderSide(color: Colors.grey),
+                          _buildDropdownField(),
+                          _buildTextField(
+                              _noHpController, 'No HP', Icons.phone_outlined),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Family Information Card
+                      _buildSectionCard(
+                        title: 'Informasi Keluarga',
+                        icon: Icons.family_restroom,
+                        children: [
+                          _buildTextField(_namaAyahController, 'Nama Ayah',
+                              Icons.person_2_outlined),
+                          _buildTextField(_namaIbuController, 'Nama Ibu',
+                              Icons.person_3_outlined),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Address Information Card
+                      _buildSectionCard(
+                        title: 'Informasi Alamat',
+                        icon: Icons.location_city,
+                        children: [
+                          _buildTextField(_kecamatanController, 'Kecamatan',
+                              Icons.location_city_outlined),
+                          _buildTextField(_kelurahanController, 'Kelurahan',
+                              Icons.home_work_outlined),
+                          _buildTextField(_alamatLengkapController,
+                              'Alamat Lengkap', Icons.home_outlined),
+                          _buildTextField(_lingkunganController, 'Lingkungan',
+                              Icons.near_me_outlined),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Documents Card
+                      _buildSectionCard(
+                        title: 'Dokumen',
+                        icon: Icons.folder,
+                        children: [
+                          _buildFileUploader(
+                            label: 'Upload Berkas KK',
+                            file: _berkasKK,
+                            onUpload: () => _pickFile('kk'),
+                            icon: Icons.family_restroom,
                           ),
-                          labelText: 'Jenis Kelamin',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30)),
+                          const SizedBox(height: 12),
+                          _buildFileUploader(
+                            label: 'Upload Akta Kelahiran',
+                            file: _berkasAktaKelahiran,
+                            onUpload: () => _pickFile('akta'),
+                            icon: Icons.document_scanner,
+                          ),
+                          if (widget.event['jenis_sakramen'] == 'Komuni' ||
+                              widget.event['jenis_sakramen'] == 'Krisma') ...[
+                            const SizedBox(height: 12),
+                            _buildFileUploader(
+                              label: 'Upload Surat Baptis',
+                              file: _berkasSuratBaptis,
+                              onUpload: () => _pickFile('baptis'),
+                              icon: Icons.church,
+                            ),
+                          ],
+                          if (widget.event['jenis_sakramen'] == 'Krisma') ...[
+                            const SizedBox(height: 12),
+                            _buildFileUploader(
+                              label: 'Upload Surat Komuni',
+                              file: _berkasSuratKomuni,
+                              onUpload: () => _pickFile('komuni'),
+                              icon: Icons.church_outlined,
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+
+                      // Submit Button
+                      Container(
+                        width: double.infinity,
+                        height: 55,
+                        child: ElevatedButton(
+                          onPressed: _isSubmitting ? null : _submitRegistration,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: oren,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            elevation: 5,
+                            shadowColor: oren.withOpacity(0.3),
+                          ),
+                          child: _isSubmitting
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white)
+                              : Text(
+                                  'Daftar',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
-                        items: ['Laki-Laki', 'Perempuan'].map((jenisKelamin) {
-                          return DropdownMenuItem(
-                            value: jenisKelamin,
-                            child: Text(jenisKelamin),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedJenisKelamin = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please select Jenis Kelamin';
-                          }
-                          return null;
-                        },
                       ),
-                    ),
-                    _buildTextField(_noHpController, 'No HP'),
-                    _buildTextField(_namaAyahController, 'Nama Ayah'),
-                    _buildTextField(_namaIbuController, 'Nama Ibu'),
-                    _buildTextField(_kecamatanController, 'Kecamatan'),
-                    _buildTextField(_kelurahanController, 'Kelurahan'),
-                    _buildTextField(_alamatLengkapController, 'Alamat Lengkap'),
-                    _buildTextField(_lingkunganController, 'Lingkungan'),
-                    const SizedBox(height: 20),
-                    _buildFileUploader(
-                      label: 'Upload Berkas KK',
-                      file: _berkasKK,
-                      onUpload: () => _pickFile('kk'),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildFileUploader(
-                      label: 'Upload Akta Kelahiran',
-                      file: _berkasAktaKelahiran,
-                      onUpload: () => _pickFile('akta'),
-                    ),
-                    if (widget.event['jenis_sakramen'] == 'Komuni' ||
-                        widget.event['jenis_sakramen'] == 'Krisma') ...[
-                      const SizedBox(height: 10),
-                      _buildFileUploader(
-                        label: 'Upload Surat Baptis',
-                        file: _berkasSuratBaptis,
-                        onUpload: () => _pickFile('baptis'),
-                      ),
+                      const SizedBox(height: 20),
                     ],
-                    if (widget.event['jenis_sakramen'] == 'Krisma') ...[
-                      const SizedBox(height: 10),
-                      _buildFileUploader(
-                        label: 'Upload Surat Komuni',
-                        file: _berkasSuratKomuni,
-                        onUpload: () => _pickFile('komuni'),
-                      ),
-                    ],
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _submitRegistration,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: oren,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        minimumSize: const Size.fromHeight(50),
-                        elevation: 3,
-                      ),
-                      child: const Text(
-                        'Daftar',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label) {
+  Widget _buildTextField(
+      TextEditingController controller, String label, IconData? icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
           filled: true,
-          fillColor: Colors.white,
+          fillColor: _isDarkMode ? Colors.grey[800] : Colors.white,
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
             borderSide: const BorderSide(color: Colors.green),
@@ -318,10 +392,14 @@ class _SakramenRegistrationScreenState
             borderSide: const BorderSide(color: Colors.grey),
           ),
           labelText: label,
+          prefixIcon: icon != null
+              ? Icon(icon, color: _isDarkMode ? Colors.white70 : Colors.grey)
+              : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
           ),
         ),
+        style: TextStyle(color: _isDarkMode ? Colors.white : Colors.black),
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter $label';
@@ -332,10 +410,93 @@ class _SakramenRegistrationScreenState
     );
   }
 
+  Widget _buildDropdownField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: DropdownButtonFormField<String>(
+        value: _selectedJenisKelamin,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: _isDarkMode ? Colors.grey[800] : Colors.white,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: const BorderSide(color: Colors.green),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: const BorderSide(color: Colors.grey),
+          ),
+          labelText: 'Jenis Kelamin',
+          prefixIcon:
+              Icon(Icons.wc, color: _isDarkMode ? Colors.white70 : Colors.grey),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+        ),
+        dropdownColor: _isDarkMode ? Colors.grey[800] : Colors.white,
+        style: TextStyle(color: _isDarkMode ? Colors.white : Colors.black),
+        items: ['Laki-Laki', 'Perempuan'].map((jenisKelamin) {
+          return DropdownMenuItem(
+            value: jenisKelamin,
+            child: Text(jenisKelamin),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _selectedJenisKelamin = value;
+          });
+        },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please select Jenis Kelamin';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      color: _isDarkMode ? Colors.grey[800] : Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: oren, size: 24),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: _isDarkMode ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFileUploader({
     required String label,
     required File? file,
     required VoidCallback onUpload,
+    IconData? icon,
   }) {
     return GestureDetector(
       onTap: onUpload,
@@ -354,7 +515,7 @@ class _SakramenRegistrationScreenState
         child: Row(
           children: [
             Icon(
-              file == null ? Icons.upload_file : Icons.check_circle,
+              file == null ? (icon ?? Icons.upload_file) : Icons.check_circle,
               color: file == null ? orenKalem : Colors.green,
             ),
             const SizedBox(width: 10),

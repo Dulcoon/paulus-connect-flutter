@@ -11,23 +11,29 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static Future<Map<String, dynamic>> loginWithGoogle() async {
+    print('Initializing Google Sign In...');
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
     await googleSignIn.signOut();
+    print('Starting Google sign in...');
 
     final googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) {
+      print('Google sign in aborted by user');
       throw Exception("Login dibatalkan oleh pengguna");
     }
 
+    print('Google user signed in: ${googleUser.email}');
     final googleAuth = await googleUser.authentication;
     final idToken = googleAuth.idToken;
 
     if (idToken == null) {
+      print('Failed to get ID token');
       throw Exception("ID Token tidak ditemukan");
     }
 
+    print('ID token obtained, sending to backend...');
     final response = await http.post(
       Uri.parse("$BASE_URL/auth/google"),
       headers: {"Content-Type": "application/json"},
@@ -36,8 +42,12 @@ class ApiService {
       }),
     );
 
+    print('Backend response status: ${response.statusCode}');
+    print('Backend response body: ${response.body}');
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
+      print('Login successful, data: $data');
 
       await saveUserToken(data['token']);
 
@@ -45,6 +55,7 @@ class ApiService {
 
       return data;
     } else {
+      print('Login failed with status ${response.statusCode}');
       throw Exception("Login Google gagal");
     }
   }
@@ -86,12 +97,16 @@ class ApiService {
       }),
     );
 
+    final data = jsonDecode(response.body);
     if (response.statusCode == 201) {
-      final data = jsonDecode(response.body);
       await saveUserToken(data['token']);
       await sendFcmTokenToLaravel(data['token']);
       return data;
+    } else if (response.statusCode == 422) {
+      // Return the full error response for field-specific handling
+      throw Exception(jsonEncode(data));
     } else {
+      print(response.statusCode);
       throw Exception("Registrasi gagal");
     }
   }

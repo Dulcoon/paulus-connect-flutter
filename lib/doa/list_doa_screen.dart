@@ -5,6 +5,9 @@ import 'detail_doa_screen.dart';
 import '../utils/constans.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:timezone/timezone.dart' as tz;
+import '../main.dart';
+import 'package:flutter/services.dart';
+import '../services/notification_service.dart';
 
 class ListDoaScreen extends StatefulWidget {
   const ListDoaScreen({super.key});
@@ -54,7 +57,7 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
 
   List<String> personalDoa = [];
   List<String> favoriteDoa = [];
-  Map<String, String> reminders = {};
+  Map<String, List<String>> reminders = {}; // title -> list of times
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -82,14 +85,17 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
         final payload = response.payload;
         print("Payload: $payload");
         if (payload != null) {
+          // Check if it's a doa reminder notification
           final doa = allDoa.firstWhere(
             (doa) => doa['title'] == payload,
             orElse: () => {},
           );
 
-          if (doa != null && doa['title'] != null && doa['content'] != null) {
+          if (doa.isNotEmpty &&
+              doa['title'] != null &&
+              doa['content'] != null) {
             Navigator.push(
-              context,
+              navigatorKey.currentContext!,
               MaterialPageRoute(
                 builder: (context) => DetailDoaScreen(
                   title: doa['title']!,
@@ -99,10 +105,8 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
             );
           } else {
             print("Doa tidak ditemukan atau data tidak lengkap.");
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text("Doa tidak ditemukan atau data tidak lengkap")),
-            );
+            // Note: ScaffoldMessenger cannot be used here as context may not be available
+            // when notification is tapped from background/terminated state
           }
         }
       },
@@ -129,8 +133,15 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
       reminders = {};
       prefs.getKeys().forEach((key) {
         if (key.startsWith('reminder_')) {
-          final title = key.replaceFirst('reminder_', '');
-          reminders[title] = prefs.getString(key) ?? '';
+          final parts = key.replaceFirst('reminder_', '').split('_');
+          if (parts.length >= 2) {
+            final title = parts.sublist(0, parts.length - 1).join('_');
+            final time = parts.last;
+            if (!reminders.containsKey(title)) {
+              reminders[title] = [];
+            }
+            reminders[title]!.add(time);
+          }
         }
       });
     });
@@ -152,13 +163,15 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
 
       if (favoriteDoa.contains(title)) {
         favoriteDoa.remove(title);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$title dihapus dari favorit')),
+        NotificationService().showInfo(
+          context,
+          '$title dihapus dari favorit',
         );
       } else {
         favoriteDoa.add(title);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$title ditambahkan ke favorit')),
+        NotificationService().showSuccess(
+          context,
+          '$title ditambahkan ke favorit',
         );
       }
       prefs.setStringList('favoriteDoa', favoriteDoa);
@@ -175,13 +188,15 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
     await prefs.setString(reminderKey, reminderValue);
 
     setState(() {
-      reminders[reminderKey] = reminderValue;
+      if (!reminders.containsKey(title)) {
+        reminders[title] = [];
+      }
+      reminders[title]!.add(reminderValue);
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text(
-              "Pengingat untuk $title berhasil ditambahkan pada ${time.hour}:${time.minute.toString().padLeft(2, '0')}")),
+    NotificationService().showSuccess(
+      context,
+      "Pengingat untuk $title pada pukul ${reminderValue} berhasil ditambahkan",
     );
 
     await _scheduleNotification(title, time);
@@ -222,7 +237,7 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
       'Saatnya berdoa: $title',
       scheduledTime,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exact,
       matchDateTimeComponents: DateTimeComponents.time,
       payload: title,
     );
@@ -230,11 +245,28 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
 
   Future<void> _deleteReminder(String title) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Get all reminder keys for this title
+    final keysToRemove = prefs
+        .getKeys()
+        .where((key) => key.startsWith('reminder_$title'))
+        .toList();
+
+    // Remove all reminders for this title
+    for (final key in keysToRemove) {
+      await prefs.remove(key);
+    }
+
     setState(() {
       reminders.remove(title);
     });
-    await prefs.remove('reminder_$title');
-    print("Pengingat untuk $title dihapus.");
+
+    NotificationService().showInfo(
+      context,
+      "Semua pengingat untuk $title dihapus.",
+    );
+
+    print("Semua pengingat untuk $title dihapus.");
   }
 
   Future<void> _setDefaultAngelusReminders() async {
@@ -258,6 +290,7 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
 
   Widget _buildDoaList(List<Map<String, String>> doaList) {
     return ListView.builder(
+      padding: const EdgeInsets.all(16),
       itemCount: doaList.length,
       itemBuilder: (context, index) {
         final doa = doaList[index];
@@ -265,71 +298,158 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
         final isFavorite = favoriteDoa.contains(title);
         final hasReminder = reminders.containsKey(title);
 
-        return ListTile(
-          title: Row(
-            children: [
-              Text(title),
-              if (hasReminder)
-                const Icon(Icons.notifications, color: Colors.blue, size: 16),
-            ],
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 2,
+          shadowColor: Colors.black.withOpacity(0.1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          trailing: IconButton(
-            icon: Icon(
-              isFavorite ? Icons.star : Icons.star_border,
-              color: isFavorite ? oren : Colors.grey,
-            ),
-            onPressed: () => _toggleFavorite(title),
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DetailDoaScreen(
-                  title: title,
-                  content: doa['content']!,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DetailDoaScreen(
+                    title: title,
+                    content: doa['content']!,
+                  ),
                 ),
+              );
+            },
+            onLongPress: () {
+              HapticFeedback.heavyImpact();
+              _showActionMenu(context, title);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        if (hasReminder) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Text(
+                                '🔔',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Pengingat: ${reminders[title]!.join(', ')}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.star : Icons.star_border,
+                      color: isFavorite ? oren : Colors.grey,
+                      size: 24,
+                    ),
+                    onPressed: () => _toggleFavorite(title),
+                  ),
+                ],
               ),
-            );
-          },
-          onLongPress: () {
-            _showActionMenu(context, title);
-          },
+            ),
+          ),
         );
       },
     );
   }
 
   void _showActionMenu(BuildContext context, String title) {
+    final hasReminder = reminders.containsKey(title);
     showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
-        return Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text("Hapus Doa"),
-              onTap: () {
-                Navigator.pop(context);
-                _deleteDoa(title);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.notifications_off, color: Colors.red),
-              title: const Text("Hapus Pengingat"),
-              onTap: () {
-                Navigator.pop(context);
-                _deleteReminder(title);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.notifications, color: Colors.blue),
-              title: const Text("Tambahkan Pengingat"),
-              onTap: () {
-                Navigator.pop(context);
-                _showReminderDialog(title);
-              },
-            ),
-          ],
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (hasReminder) ...[
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.access_time,
+                          color: Colors.blue, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Pengingat: ${reminders[title]!.join(', ')}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+              ],
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text("Hapus Doa"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteDoa(title);
+                },
+              ),
+              if (hasReminder)
+                ListTile(
+                  leading:
+                      const Icon(Icons.notifications_off, color: Colors.red),
+                  title: const Text("Hapus Pengingat"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _deleteReminder(title);
+                  },
+                ),
+              ListTile(
+                leading: const Icon(Icons.notifications, color: Colors.blue),
+                title: const Text("Tambahkan Pengingat"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showReminderDialog(title);
+                },
+              ),
+            ],
+          ),
         );
       },
     );
@@ -345,8 +465,9 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
       prefs.setStringList('favoriteDoa', favoriteDoa);
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Doa \"$title\" berhasil dihapus")),
+    NotificationService().showSuccess(
+      context,
+      "$title berhasil dihapus.",
     );
   }
 
@@ -377,7 +498,10 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
             ),
             textAlign: TextAlign.center,
           ),
-          backgroundColor: bgCollor,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          elevation: 2,
+          shadowColor: Colors.black.withOpacity(0.1),
           automaticallyImplyLeading: false,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -387,12 +511,23 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
             color: Colors.black,
           ),
           centerTitle: true,
-          bottom: const TabBar(
-            indicatorColor: oren,
-            labelColor: oren,
-            unselectedLabelColor: Colors.black54,
-            automaticIndicatorColorAdjustment: true,
-            tabs: [
+          bottom: TabBar(
+            indicator: BoxDecoration(
+              color: oren,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.grey[600],
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 14,
+            ),
+            tabs: const [
               Tab(text: "Semua Doa"),
               Tab(text: "Doa Pribadi"),
               Tab(text: "Favorit"),
@@ -408,7 +543,7 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.bookmark_border,
+                          Icons.menu_book,
                           size: 80,
                           color: Colors.grey[400],
                         ),
@@ -423,7 +558,7 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          "Tambahkan doa pribadi Anda untuk memulai.",
+                          "Buat doa pribadi Anda sendiri untuk mengungkapkan harapan dan doa kepada Tuhan.",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
@@ -441,11 +576,9 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                               _addPersonalDoa(
                                   newDoa['title']!, newDoa['content']!);
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      "Judul atau isi doa tidak boleh kosong"),
-                                ),
+                              NotificationService().showInfo(
+                                context,
+                                "Judul atau isi doa tidak boleh kosong",
                               );
                             }
                           },
@@ -493,10 +626,9 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                               _addPersonalDoa(
                                   newDoa['title']!, newDoa['content']!);
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        "Judul atau isi doa tidak boleh kosong")),
+                              NotificationService().showInfo(
+                                context,
+                                "Judul atau isi doa tidak boleh kosong",
                               );
                             }
                           },
@@ -637,14 +769,9 @@ class _ListDoaScreenState extends State<ListDoaScreen> {
                     ElevatedButton(
                       onPressed: () {
                         if (title.isEmpty || content.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "Judul atau isi doa tidak boleh kosong",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              backgroundColor: Colors.red,
-                            ),
+                          NotificationService().showInfo(
+                            context,
+                            "Judul atau isi doa tidak boleh kosong",
                           );
                         } else {
                           Navigator.pop(context, {

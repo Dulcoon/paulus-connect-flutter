@@ -72,13 +72,18 @@ class _DetailDoaScreenState extends State<DetailDoaScreen> {
 
     print("Notifikasi dijadwalkan pada $tzScheduledTime");
 
+    // Encode payload as JSON string
+    String payload =
+        '{"action": "view_doa", "title": "$title", "content": "${widget.content.replaceAll('"', '\\"')}"}';
+
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
       'Pengingat Doa',
       'Saatnya berdoa: $title',
       tzScheduledTime,
       platformDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exact,
+      payload: payload,
     );
 
     print("Notifikasi berhasil dijadwalkan.");
